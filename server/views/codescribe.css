@@ -1,0 +1,264 @@
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol,
+ul {
+  list-style: none;
+}
+blockquote,
+q {
+  quotes: none;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+body {
+  font: 13px 'helvetica neue', helvetica, arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+li {
+  list-style: none;
+}
+#header {
+  width: 100%;
+  height: 45px;
+  background: #2f2f2f;
+}
+#navigation {
+  border-left: 1px solid #929292;
+  border-right: 1px solid #929292;
+  position: absolute;
+  left: 0;
+  top: 45px;
+  bottom: 0;
+  width: 200px;
+  background: #808080;
+}
+#navigation #dashboard,
+#chats,
+#files,
+#friends {
+  cursor: pointer;
+  position: relative;
+  left: 0px;
+  top: 0px;
+  border-bottom: 1px solid #d4d4d4;
+  margin-bottom: 0px;
+  width: 200px;
+  height: 50px;
+  background: #f0f0f0;
+  color: #2f2f2f;
+  font-weight: bold;
+  font-size: 16px;
+}
+#container #navigation .no-border {
+  border-bottom: 0px;
+}
+#navigation span {
+  display: block;
+  padding: 15px;
+}
+#container #navigation div.active {
+  cursor: auto;
+  border-right: 1px solid #b5b5b5;
+  border-bottom: 1px solid #929292;
+  border-top: 1px solid #929292;
+  background: -webkit-gradient(linear, left top, right top, color-stop(0, #b7b7b7), color-stop(1, #b5b5b5));
+  background: -webkit-linear-gradient(left, #b7b7b7 0%, #b5b5b5 100%);
+  background: -moz-linear-gradient(left, #b7b7b7 0%, #b5b5b5 100%);
+  background: -o-linear-gradient(left, #b7b7b7 0%, #b5b5b5 100%);
+  background: -ms-linear-gradient(left, #b7b7b7 0%, #b5b5b5 100%);
+  background: linear-gradient(left, #b7b7b7 0%, #b5b5b5 100%);
+  color: #f6f5f5;
+}
+#friends_list {
+  width: 100%;
+  padding: 5px 0px 5px 0px;
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0, #9f9d9d), color-stop(1, #b6b5b5));
+  background: -webkit-linear-gradient(bottom, #9f9d9d 0%, #b6b5b5 100%);
+  background: -moz-linear-gradient(bottom, #9f9d9d 0%, #b6b5b5 100%);
+  background: -o-linear-gradient(bottom, #9f9d9d 0%, #b6b5b5 100%);
+  background: -ms-linear-gradient(bottom, #9f9d9d 0%, #b6b5b5 100%);
+  background: linear-gradient(bottom, #9f9d9d 0%, #b6b5b5 100%);
+  border-bottom: 2px solid #767676;
+}
+#friends_list li {
+  position: relative;
+  padding: 8px 0px 8px 10px;
+}
+#friends_list li .avatar {
+  position: absolute;
+  left: 10px;
+  top: 9px;
+  width: 24px;
+  height: 24px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+  background-image: url("avatar.png");
+}
+@media all and (-webkit-min-device-pixel-ratio: 1.5) {
+  #friends_list li .avatar {
+    background-image: url("avatar@2x.png");
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+#friends_list span {
+  display: block;
+  margin: 0 0 0 30px;
+  padding: 0;
+}
+#friends_list span.name {
+  font-size: 12px;
+}
+#friends_list span.status {
+  font-size: 10px;
+  margin-left: 38px;
+  color: #3d3d3d;
+}
+#friends_list span.status.online {
+  color: #27832b;
+  font-weight: bold;
+}
+#friends_list span.status:after {
+  content: '';
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #000;
+  bottom: 11px;
+  left: 40px;
+  background: #7f7f7f;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+#friends_list span.status.online:after {
+  background: #27832b;
+}
+#nav_pane {
+  position: absolute;
+  left: 202px;
+  top: 45px;
+  bottom: 0;
+  width: 275px;
+  background: #b5b5b5;
+}
+#content {
+  position: absolute;
+  top: 45px;
+  left: 477px;
+  right: 0;
+  bottom: 0;
+  background: #e6e7e6;
+}
