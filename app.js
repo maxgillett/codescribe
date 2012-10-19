@@ -1,18 +1,24 @@
 var express = require('express')
+  , config = require('./config.json')
   , passport = require('passport')
   , GitHubStrategy = require('passport-github').Strategy
   , stylus = require('stylus')
   , nib = require('nib')
   , jade = require('jade')
   , ember = require('ember')
+  , mongo = require('mongodb')
+  , mongoose = require('mongoose')
   , redis = require('redis')
   , RedisStore = require('connect-redis')(express)
   , io = require('socket.io').listen(app);
 
-// Passport setup
+var db = mongoose.createConnection('localhost', 'test');
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+  console.log("Mongo db connection established")
+});
 
-var GITHUB_CLIENT_ID = "--insert-github-client-id-here--"
-var GITHUB_CLIENT_SECRET = "--insert-github-client-secret-here--";
+// Passport setup
 
 passport.serializeUser(function(user, done) {
   done(null, user);
@@ -23,9 +29,9 @@ passport.deserializeUser(function(obj, done) {
 });
 
 passport.use(new GitHubStrategy({
-    clientID: GITHUB_CLIENT_ID,
-    clientSecret: GITHUB_CLIENT_SECRET,
-    callbackURL: "http://127.0.0.1:3000/auth/github/callback"
+    clientID: config.auth.github.clientId,
+    clientSecret: config.auth.github.clientSecret,
+    callbackURL: config.auth.github.callbackURL
   },
   function(accessToken, refreshToken, profile, done) {
     // asynchronous verification, for effect...
@@ -35,6 +41,7 @@ passport.use(new GitHubStrategy({
       // represent the logged-in user.  In a typical application, you would want
       // to associate the GitHub account with a user record in your database,
       // and return that user instead.
+      console.log(profile);
       return done(null, profile);
     });
   }
@@ -42,8 +49,8 @@ passport.use(new GitHubStrategy({
 
 // Redis and session store setup
 
-var redisClient = redis.createClient();
-var sessionStore = exports.sessionStore = new RedisStore({client: redisClient})
+var redisClient = exports.redisClient = redis.createClient();
+var sessionStore = exports.sessionStore = new RedisStore({client: redisClient});
 
 // Create and configure express app
 
@@ -66,7 +73,7 @@ app.configure(function() {
   }));
   this.use(express.static(__dirname+'/public'));
   this.use(express.bodyParser());
-  this.use(expresss.cookieParser());
+  this.use(express.cookieParser('secretstring'));
   this.use(express.session({
     key: "codescribe",
     store: sessionStore
@@ -78,5 +85,5 @@ app.configure(function() {
 
 require('./routes');
 
-app.listen(3030);
-console.log('Listening on port 3030');
+app.listen(3000);
+console.log('Listening on port 3000');
