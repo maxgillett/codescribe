@@ -18,10 +18,34 @@ db.once('open', function () {
   console.log("Mongo db connection established")
 });
 
+// Set up user schema and model
+
+var userSchema = new mongoose.Schema({
+  uid: Number,
+  name: String,
+  username: String,
+  avatar: String
+});
+
+userSchema.statics.findOrCreate = function(data, done) {
+  var that = this;
+  var user = this.findOne({id: data.id}, 'name', function(err, user) {
+    if (!user) {
+      that.create(data, function(err, newuser) {
+        done(null, newuser);
+      });
+    } else {
+      done(null, user);
+    }
+  });
+}
+
+var User = db.model('User', userSchema);
+
 // Passport setup
 
 passport.serializeUser(function(user, done) {
-  done(null, user);
+  done(null, user.id);
 });
 
 passport.deserializeUser(function(obj, done) {
@@ -34,15 +58,14 @@ passport.use(new GitHubStrategy({
     callbackURL: config.auth.github.callbackURL
   },
   function(accessToken, refreshToken, profile, done) {
-    // asynchronous verification, for effect...
     process.nextTick(function () {
-      
-      // To keep the example simple, the user's GitHub profile is returned to
-      // represent the logged-in user.  In a typical application, you would want
-      // to associate the GitHub account with a user record in your database,
-      // and return that user instead.
-      console.log(profile);
-      return done(null, profile);
+      var data = {
+        id: profile.id,
+        name: profile.displayName,
+        username: profile.username,
+        avatar: profile._json.avatar_url
+      }
+      User.findOrCreate(data, done);
     });
   }
 ));
