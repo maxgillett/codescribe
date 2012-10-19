@@ -2,12 +2,15 @@ doctype strict 5
 html
 	head
 		title CodeScribe
-		link(rel='stylesheet', href='./codescribe.css')
-		link(rel='stylesheet', href='./libs/codemirror/lib/codemirror.css')
-		script(src='http://code.jquery.com/jquery-1.8.2.min.js')
-		script(src='./libs/codemirror/lib/codemirror.js')
-		script(src='./libs/codemirror/lib/util/runmode.js')
-		script(src='./libs/codemirror/mode/javascript/javascript.js')
+		link(rel='stylesheet', href='./stylesheets/codescribe.css')
+		link(rel='stylesheet', href='./javascripts/vendor/codemirror/lib/codemirror.css')
+		script(src='./javascripts/vendor/jquery-1.7.min.js')
+		script(src='./javascripts/vendor/handlebars-1.0.rc.1.js')
+		script(src='./javascripts/vendor/ember-1.0.pre.js')
+		script(src='./javascripts/vendor/ember-data.js')
+		script(src='./javascripts/vendor/codemirror/lib/codemirror.js')
+		script(src='./javascripts/vendor/codemirror/lib/util/runmode.js')
+		script(src='./javascripts/vendor/codemirror/mode/javascript/javascript.js')
 	body
 		#header
 		#container
@@ -156,4 +159,6 @@ html
 			#editor_pane
 		script(type='text/javascript')	
 			CodeMirror.runMode($('#message .msg .code').text(), {name: "javascript", json: true}, $('#message .msg .code').get(0))
+
+
 
