@@ -11,47 +11,67 @@ html
 		script(src='./javascripts/vendor/codemirror/lib/codemirror.js')
 		script(src='./javascripts/vendor/codemirror/lib/util/runmode.js')
 		script(src='./javascripts/vendor/codemirror/mode/javascript/javascript.js')
+		script(src='./javascripts/vendor/jquery.dotdotdot-1.5.1.js')	
 	body
-		#header
-		#container
-			#navigation
-				#dashboard.no-border 
-					.text
-						.dash-img
-						span Dashboard
-				#chats.active 
-					.text
-						.chats-img.white
-						span Chats
-				#files 
-					.text
-						.files-img
-						span Files
-				#friends 
-					.text
-						.friends-img
-						span Friends
-				#friends_list
-					li 
-						.avatar
-						span.name Max Gillett
-						span.status Offline
-					li 
-						.avatar
-						span.name Peter Thiel
-						span.status Offline
-					li 
-						.avatar
-						span.name Max Levchin
-						span.status.online Online
-					li 
-						.avatar
-						span.name Elon Musk
-						span.status Offline
-					li 
-						.avatar
-						span.name Luke Nosek
-						span.status Offline
+		script(type='text/x-handlebars', 'data-template-name'='application')
+			#header
+			#container
+				#navigation
+					|	<div id="dashboard" {{action goToDashboard}} {{bindAttr class="isChats:no-border"}}>
+					| 		<div class="text">
+					|			<div class="dash-img"></div>
+					|			<span>Dashboard</span>
+					|		</div>
+					|	</div>
+					|	<div id="chats" {{action goToChats}} {{bindAttr class="isChats:active isChats:white"}}>
+					| 		<div class="text">
+					|			<div class="chats-img"></div>
+					|			<span>Chats</span>
+					|		</div>
+					|	</div>
+					|	<div id="files">
+					| 		<div class="text">
+					|			<div class="files-img"></div>
+					|			<span>Files</span>
+					|		</div>
+					|	</div>
+					|	<div id="friends">
+					|		<div class="text">
+					|			<div class="friends-img"></div>
+					|			<span>Friends</span>
+					|		</div>	
+					|	</div>
+					#friends_list
+						li 
+							.avatar
+							span.name Max Gillett
+							span.status Offline
+						li 
+							.avatar
+							span.name Peter Thiel
+							span.status Offline
+						li 
+							.avatar
+							span.name Max Levchin
+							span.status.online Online
+						li 
+							.avatar
+							span.name Elon Musk
+							span.status Offline
+						li 
+							.avatar
+							span.name Luke Nosek
+							span.status Offline
+
+				{{ outlet navpane }}
+
+				#content 
+					{{ outlet content }}
+
+		script(type='text/x-handlebars', 'data-template-name'='dashboard')
+			#d
+
+		script(type='text/x-handlebars', 'data-template-name'='chatlist')
 			#nav_pane
 				#fixed_header	
 					.mag_icon
@@ -65,27 +85,27 @@ html
 						span Today
 						span 3 chats
 					#group
-						.chat 
+						.chat.ellipsis
 							span.members Zach Sherman + 3 more
 							span.time 9:15pm
-							span.text Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-						.chat.active
+							span.text Lorem ipsum dolor sit amet, consectetur adipisicing elit,  consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
+						.chat.ellipsis
 							span.members Elon Musk
 							span.time 1:04pm
 							span.text zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-						.chat
+						.chat.ellipsis
 							span.members Max Levchin
 							span.time 10:04am
-							span.text Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 	
+							span.text Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco itation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
 					h2 
 						span Yesterday
 						span 2 chats
 					#group
-						.chat	
+						.chat.ellipsis	
 							span.members Elon Musk
 							span.time Tuesday
-							span.text zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-						.chat
+							span.text zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco itation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
+						.chat.ellipsis
 							span.members Elon Musk
 							span.time Tuesday
 							span.text zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
@@ -94,71 +114,73 @@ html
 						span This Week
 						span 2 chats
 					#group
-						.chat	
+						.chat.ellipsis
 							span.members Max Levchin
 							span.text Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco .chat	
-						.chat	
+						.chat.ellipsis	
 							span.members Max Levchin
 							span.text Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-			#content
-				#message_window
-					#message
-						.image
-							img(class='profile-img', src='images/avatar@2x.png')
-						.text
-							.user 
-								span.name Max Gillett
-								span.time  - 11:08am
-							.msg
-								span Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-						.clearfix
-					#divider
-					#message
-						.image
-							img(class='profile-img', src='images/avatar@2x.png')
-						.text
-							.user
-								span.name Elon Musk
-								span.time  - 12:14pm
-							.msg
-								span ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m
-							.msg
-								pre.code.cm-s-default
-									| app.configure(function() {
-									|  function compile(str, path) {
-									|   return stylus(str)
-									|      .use(nib())
-									|      .import('nib')
-									|      .import(__dirname + '/server/views/reset');
-									|  }
-									|  this.use(stylus.middleware({
-									|    src: __dirname + "/server/views",
-									|    compile: compile,
-									|    force: true
-									|  }));
-									|  this.use(express.static(__dirname+'/server/views'));
-									| });
-							.msg
-								span ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m
-					#divider
-					#message
-						.image
-							img(class='profile-img', src='images/avatar@2x.png')
-						.text
-							.user
-								span.name Elon Musk
-								span.time  - 1:04pm
-							.msg
-								span ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m
+			
+
+		script(type='text/x-handlebars', 'data-template-name'='chatroom')
+			#message_window
+				#message
+					.image
+						img(class='profile-img', src='images/avatar@2x.png')
+					.text
+						.user 
+							span.name Max Gillett
+							span.time  - 11:08am
+						.msg
+							span Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+					.clearfix
+				#divider
+				#message
+					.image
+						img(class='profile-img', src='images/avatar@2x.png')
+					.text
+						.user
+							span.name Elon Musk
+							span.time  - 12:14pm
+						.msg
+							span ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m
+						.msg
+							pre.code.cm-s-default
+								| app.configure(function() {
+								|  function compile(str, path) {
+								|   return stylus(str)
+								|      .use(nib())
+								|      .import('nib')
+								|      .import(__dirname + '/server/views/reset');
+								|  }
+								|  this.use(stylus.middleware({
+								|    src: __dirname + "/server/views",
+								|    compile: compile,
+								|    force: true
+								|  }));
+								|  this.use(express.static(__dirname+'/server/views'));
+								| });
+						.msg
+							span ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m
+				#divider
+				#message
+					.image
+						img(class='profile-img', src='images/avatar@2x.png')
+					.text
+						.user
+							span.name Elon Musk
+							span.time  - 1:04pm
+						.msg
+							span ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m
 
 
-				textarea#response
-					| Send a message
+			textarea#response(placeholder="Send a message")
 
-
-			#editor_pane
+		script(src='./javascripts/application.js')
 		script(type='text/javascript')	
-			CodeMirror.runMode($('#message .msg .code').text(), {name: "javascript", json: true}, $('#message .msg .code').get(0))
-
+			$(document).ready(function() {
+				CodeMirror.runMode($('#message .msg .code').text(), {name: "javascript", json: true}, $('#message .msg .code').get(0))
+				$(".ellipsis").dotdotdot();
+			});
 
 

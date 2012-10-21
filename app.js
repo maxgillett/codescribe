@@ -89,10 +89,11 @@ app.configure(function() {
       .import(__dirname + '/assets/stylesheets/reset');
   }
   this.use(stylus.middleware({
-    src: __dirname + "/assets/stylesheets",
-    dest: __dirname + "/public/stylesheets",
+    src: __dirname + "/assets",
+    dest: __dirname + "/public",
     compile: compile,
-    force: true
+    force: true,
+    debug: true
   }));
   this.use(express.static(__dirname+'/public'));
   this.use(express.bodyParser());

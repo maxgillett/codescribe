@@ -141,19 +141,18 @@ listing {
   background: #27832b;
 }
 #nav_pane {
-  overflow: auto;
   absolute: top 45px left 202px;
   bottom: 0;
   background: #b4b8c7;
   border-right: 1px solid #929292;
+  width: 275px;
 }
 #nav_pane #fixed_header {
-  position: fixed;
+  position: relative;
   z-index: 10;
   padding: 10px 0 0 18px;
   width: 257px;
   height: 55px;
-  background: #b4b8c7;
 }
 #nav_pane #fixed_header #search {
   box-shadow: 0px -1px 2px 0px #666;
@@ -209,8 +208,12 @@ listing {
   background: #b4b8c7;
 }
 #nav_pane #chat_container {
-  relative: top 68px;
-  padding: 0 0 0 18px;
+  position: absolute;
+  overflow-x: none;
+  overflow-y: auto;
+  top: 58px;
+  bottom: 0;
+  padding: 10px 0 0 18px;
   width: 257px;
 }
 #nav_pane h2 {
@@ -272,7 +275,7 @@ listing {
 #content {
   position: absolute;
   top: 45px;
-  left: 478px;
+  left: 202px;
   right: 0;
   bottom: 0;
   background: #e6e7e6;

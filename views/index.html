@@ -11,49 +11,65 @@
     <script src="./javascripts/vendor/codemirror/lib/codemirror.js"></script>
     <script src="./javascripts/vendor/codemirror/lib/util/runmode.js"></script>
     <script src="./javascripts/vendor/codemirror/mode/javascript/javascript.js"></script>
+    <script src="./javascripts/vendor/jquery.dotdotdot-1.5.1.js">	</script>
   </head>
   <body>
-    <div id="header"></div>
-    <div id="container">
-      <div id="navigation">
-        <div id="dashboard" class="no-border"> 
-          <div class="text">
-            <div class="dash-img"></div><span>Dashboard</span>
+    <script type="text/x-handlebars" data-template-name="application">
+      <div id="header"></div>
+      <div id="container">
+        <div id="navigation">
+          	<div id="dashboard" {{action goToDashboard}} {{bindAttr class="isChats:no-border"}}>
+          		<div class="text">
+          			<div class="dash-img"></div>
+          			<span>Dashboard</span>
+          		</div>
+          	</div>
+          	<div id="chats" {{action goToChats}} {{bindAttr class="isChats:active isChats:white"}}>
+          		<div class="text">
+          			<div class="chats-img"></div>
+          			<span>Chats</span>
+          		</div>
+          	</div>
+          	<div id="files">
+          		<div class="text">
+          			<div class="files-img"></div>
+          			<span>Files</span>
+          		</div>
+          	</div>
+          	<div id="friends">
+          		<div class="text">
+          			<div class="friends-img"></div>
+          			<span>Friends</span>
+          		</div>	
+          	</div>
+          <div id="friends_list">
+            <li> 
+              <div class="avatar"></div><span class="name">Max Gillett</span><span class="status">Offline</span>
+            </li>
+            <li> 
+              <div class="avatar"></div><span class="name">Peter Thiel</span><span class="status">Offline</span>
+            </li>
+            <li> 
+              <div class="avatar"></div><span class="name">Max Levchin</span><span class="status online">Online</span>
+            </li>
+            <li> 
+              <div class="avatar"></div><span class="name">Elon Musk</span><span class="status">Offline</span>
+            </li>
+            <li> 
+              <div class="avatar"></div><span class="name">Luke Nosek</span><span class="status">Offline</span>
+            </li>
           </div>
-        </div>
-        <div id="chats" class="active"> 
-          <div class="text">
-            <div class="chats-img white"></div><span>Chats</span>
-          </div>
-        </div>
-        <div id="files"> 
-          <div class="text">
-            <div class="files-img"></div><span>Files</span>
-          </div>
-        </div>
-        <div id="friends"> 
-          <div class="text">
-            <div class="friends-img"></div><span>Friends</span>
-          </div>
-        </div>
-        <div id="friends_list">
-          <li> 
-            <div class="avatar"></div><span class="name">Max Gillett</span><span class="status">Offline</span>
-          </li>
-          <li> 
-            <div class="avatar"></div><span class="name">Peter Thiel</span><span class="status">Offline</span>
-          </li>
-          <li> 
-            <div class="avatar"></div><span class="name">Max Levchin</span><span class="status online">Online</span>
-          </li>
-          <li> 
-            <div class="avatar"></div><span class="name">Elon Musk</span><span class="status">Offline</span>
-          </li>
-          <li> 
-            <div class="avatar"></div><span class="name">Luke Nosek</span><span class="status">Offline</span>
-          </li>
+        </div>{{ outlet navpane }}
+        <div id="content">
+           
+          {{ outlet content }}
         </div>
       </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="dashboard">
+      <div id="d"></div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="chatlist">
       <div id="nav_pane">
         <div id="fixed_header">	
           <div class="mag_icon"></div>
@@ -67,40 +83,41 @@
         <div id="chat_container">
           <h2> <span>Today</span><span>3 chats</span></h2>
           <div id="group">
-            <div class="chat"> <span class="members">Zach Sherman + 3 more</span><span class="time">9:15pm</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
-            <div class="chat active"><span class="members">Elon Musk</span><span class="time">1:04pm</span><span class="text">zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
-            <div class="chat"><span class="members">Max Levchin</span><span class="time">10:04am</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 	</span></div>
+            <div class="chat ellipsis"><span class="members">Zach Sherman + 3 more</span><span class="time">9:15pm</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit,  consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
+            <div class="chat ellipsis"><span class="members">Elon Musk</span><span class="time">1:04pm</span><span class="text">zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
+            <div class="chat ellipsis"><span class="members">Max Levchin</span><span class="time">10:04am</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco itation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
           </div>
           <h2> <span>Yesterday</span><span>2 chats</span></h2>
           <div id="group">
-            <div class="chat">	<span class="members">Elon Musk</span><span class="time">Tuesday</span><span class="text">zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
-            <div class="chat"><span class="members">Elon Musk</span><span class="time">Tuesday</span><span class="text">zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
+            <div class="chat ellipsis">	<span class="members">Elon Musk</span><span class="time">Tuesday</span><span class="text">zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco itation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
+            <div class="chat ellipsis"><span class="members">Elon Musk</span><span class="time">Tuesday</span><span class="text">zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
           </div>
           <h2> <span>This Week</span><span>2 chats</span></h2>
           <div id="group">
-            <div class="chat">	<span class="members">Max Levchin</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco .chat	</span></div>
-            <div class="chat">	<span class="members">Max Levchin</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
+            <div class="chat ellipsis"><span class="members">Max Levchin</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco .chat	</span></div>
+            <div class="chat ellipsis">	<span class="members">Max Levchin</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
           </div>
         </div>
       </div>
-      <div id="content">
-        <div id="message_window">
-          <div id="message">
-            <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
-            <div class="text">
-              <div class="user"> <span class="name">Max Gillett</span><span class="time"> - 11:08am</span></div>
-              <div class="msg"><span>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</span></div>
-            </div>
-            <div class="clearfix"></div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="chatroom">
+      <div id="message_window">
+        <div id="message">
+          <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
+          <div class="text">
+            <div class="user"> <span class="name">Max Gillett</span><span class="time"> - 11:08am</span></div>
+            <div class="msg"><span>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</span></div>
           </div>
-          <div id="divider"></div>
-          <div id="message">
-            <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
-            <div class="text">
-              <div class="user"><span class="name">Elon Musk</span><span class="time"> - 12:14pm</span></div>
-              <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
-              <div class="msg">
-                <pre class="code cm-s-default">app.configure(function() {
+          <div class="clearfix"></div>
+        </div>
+        <div id="divider"></div>
+        <div id="message">
+          <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
+          <div class="text">
+            <div class="user"><span class="name">Elon Musk</span><span class="time"> - 12:14pm</span></div>
+            <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
+            <div class="msg">
+              <pre class="code cm-s-default">app.configure(function() {
  function compile(str, path) {
   return stylus(str)
      .use(nib())
@@ -114,26 +131,27 @@
  }));
  this.use(express.static(__dirname+'/server/views'));
 });</pre>
-              </div>
-              <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
             </div>
-          </div>
-          <div id="divider"></div>
-          <div id="message">
-            <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
-            <div class="text">
-              <div class="user"><span class="name">Elon Musk</span><span class="time"> - 1:04pm</span></div>
-              <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
-            </div>
+            <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
           </div>
         </div>
-        <textarea id="response">Send a message</textarea>
+        <div id="divider"></div>
+        <div id="message">
+          <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
+          <div class="text">
+            <div class="user"><span class="name">Elon Musk</span><span class="time"> - 1:04pm</span></div>
+            <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
+          </div>
+        </div>
       </div>
-      <div id="editor_pane"></div>
-    </div>
+      <textarea id="response" placeholder="Send a message"></textarea>
+    </script>
+    <script src="./javascripts/application.js"></script>
     <script type="text/javascript">
-      CodeMirror.runMode($('#message .msg .code').text(), {name: "javascript", json: true}, $('#message .msg .code').get(0))
-      
+      $(document).ready(function() {
+       CodeMirror.runMode($('#message .msg .code').text(), {name: "javascript", json: true}, $('#message .msg .code').get(0))
+       $(".ellipsis").dotdotdot();
+      });
       
       
     </script>
