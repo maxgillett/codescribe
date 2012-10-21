@@ -21,6 +21,12 @@ App = Em.Application.create({
   	ApplicationView: Ember.View.extend({
     	templateName: 'application'
   	}),
+  	ChatsController:  Em.Controller.extend({
+
+  	}),
+  	ChatsView:  Em.View.extend({
+  		templateName:  'chats'
+  	}),
   	ChatlistController:  Em.Controller.extend({
   		hideView: false
    	}),
@@ -70,14 +76,13 @@ App = Em.Application.create({
 	    	index:  Ember.Route.extend({
         		route:  '/',
         		connectOutlets: function(router, context) {
-        			router.get('applicationController').connectOutlet('content', 'dashboard');
+        			router.get('applicationController').connectOutlet('dashboard');
         		}
         	}),
         	chats:  Ember.Route.extend({
         		route:  '/chats',
         		connectOutlets: function(router, context) {
-        			router.get('applicationController').connectOutlet('navpane', 'chatlist');
-        			router.get('applicationController').connectOutlet('content', 'chatroom');
+        			router.get('applicationController').connectOutlet('chats');
         		}
         	}),
         	files:  Ember.Route.extend({

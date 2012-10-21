@@ -24,9 +24,9 @@
           			<span>Dashboard</span>
           		</div>
           	</div>
-          	<div id="chats" {{action goToChats}} {{bindAttr class="isChats:active isChats:white"}}>
+          	<div id="chats" {{action goToChats}} {{bindAttr class="isChats:active"}}>
           		<div class="text">
-          			<div class="chats-img"></div>
+          			<div class="chats-img" {{bindAttr class="isChats:white"}}></div>
           			<span>Chats</span>
           		</div>
           	</div>
@@ -59,16 +59,14 @@
               <div class="avatar"></div><span class="name">Luke Nosek</span><span class="status">Offline</span>
             </li>
           </div>
-        </div>{{ outlet navpane }}
-        <div id="content">
-           
-          {{ outlet content }}
-        </div>
+        </div>{{ outlet }}
       </div>
     </script>
-    <script type="text/x-handlebars" data-template-name="dashboard">
-      <div id="d"></div>
+    <script type="text/x-handlebars" data-template-name="chats">
+      {{ view App.ChatlistView }}
+      {{ view App.ChatroomView }}
     </script>
+    <script type="text/x-handlebars" data-template-name="dashboard"></script>
     <script type="text/x-handlebars" data-template-name="chatlist">
       <div id="nav_pane">
         <div id="fixed_header">	
@@ -101,23 +99,24 @@
       </div>
     </script>
     <script type="text/x-handlebars" data-template-name="chatroom">
-      <div id="message_window">
-        <div id="message">
-          <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
-          <div class="text">
-            <div class="user"> <span class="name">Max Gillett</span><span class="time"> - 11:08am</span></div>
-            <div class="msg"><span>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</span></div>
+      <div id="content"> 
+        <div id="message_window">
+          <div id="message">
+            <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
+            <div class="text">
+              <div class="user"> <span class="name">Max Gillett</span><span class="time"> - 11:08am</span></div>
+              <div class="msg"><span>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco</span></div>
+            </div>
+            <div class="clearfix"></div>
           </div>
-          <div class="clearfix"></div>
-        </div>
-        <div id="divider"></div>
-        <div id="message">
-          <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
-          <div class="text">
-            <div class="user"><span class="name">Elon Musk</span><span class="time"> - 12:14pm</span></div>
-            <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
-            <div class="msg">
-              <pre class="code cm-s-default">app.configure(function() {
+          <div id="divider"></div>
+          <div id="message">
+            <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
+            <div class="text">
+              <div class="user"><span class="name">Elon Musk</span><span class="time"> - 12:14pm</span></div>
+              <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
+              <div class="msg">
+                <pre class="code cm-s-default">app.configure(function() {
  function compile(str, path) {
   return stylus(str)
      .use(nib())
@@ -131,20 +130,21 @@
  }));
  this.use(express.static(__dirname+'/server/views'));
 });</pre>
+              </div>
+              <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
             </div>
-            <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
+          </div>
+          <div id="divider"></div>
+          <div id="message">
+            <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
+            <div class="text">
+              <div class="user"><span class="name">Elon Musk</span><span class="time"> - 1:04pm</span></div>
+              <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
+            </div>
           </div>
         </div>
-        <div id="divider"></div>
-        <div id="message">
-          <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
-          <div class="text">
-            <div class="user"><span class="name">Elon Musk</span><span class="time"> - 1:04pm</span></div>
-            <div class="msg"><span>ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m</span></div>
-          </div>
-        </div>
+        <textarea id="response" placeholder="Send a message"></textarea>
       </div>
-      <textarea id="response" placeholder="Send a message"></textarea>
     </script>
     <script src="./javascripts/application.js"></script>
     <script type="text/javascript">
