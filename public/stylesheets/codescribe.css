@@ -170,9 +170,6 @@ listing {
   font-weight: bold;
   font-size: 16px;
 }
-#container #navigation .no-border {
-  border-bottom: 0px;
-}
 #navigation .text {
   display: block;
   padding: 10px 0px 10px 15px;
@@ -250,16 +247,36 @@ listing {
 }
 #container #navigation div.active {
   cursor: auto;
-  border-right: 1px solid #b4b8c7;
   border-bottom: 1px solid #929292;
   border-top: 1px solid #929292;
+  color: #f6f5f5;
+}
+#container #navigation #dashboard.active {
+  background: #87a6cb;
+}
+#container #navigation #chats.active {
+  border-right: 1px solid #b4b8c7;
   background: -webkit-gradient(linear, left top, right top, color-stop(0, #9da2b6), color-stop(1, #b4b8c7));
   background: -webkit-linear-gradient(left, #9da2b6 0%, #b4b8c7 100%);
   background: -moz-linear-gradient(left, #9da2b6 0%, #b4b8c7 100%);
   background: -o-linear-gradient(left, #9da2b6 0%, #b4b8c7 100%);
   background: -ms-linear-gradient(left, #9da2b6 0%, #b4b8c7 100%);
   background: linear-gradient(left, #9da2b6 0%, #b4b8c7 100%);
-  color: #f6f5f5;
+}
+#container #navigation #files.active {
+  border-right: 1px solid #a2be8c;
+  background: -webkit-gradient(linear, left top, right top, color-stop(0, #8daf72), color-stop(1, #a2be8c));
+  background: -webkit-linear-gradient(left, #8daf72 0%, #a2be8c 100%);
+  background: -moz-linear-gradient(left, #8daf72 0%, #a2be8c 100%);
+  background: -o-linear-gradient(left, #8daf72 0%, #a2be8c 100%);
+  background: -ms-linear-gradient(left, #8daf72 0%, #a2be8c 100%);
+  background: linear-gradient(left, #8daf72 0%, #a2be8c 100%);
+}
+#container #navigation div.no-border-bottom {
+  border-bottom: 0px;
+}
+#container #navigation div.no-border-top {
+  border-top: 0px;
 }
 #friends_list {
   width: 100%;
@@ -335,6 +352,9 @@ listing {
   background: #b4b8c7;
   border-right: 1px solid #929292;
   width: 275px;
+}
+#nav_pane.filelist {
+  background: #a2be8c;
 }
 #nav_pane #fixed_header {
   position: relative;

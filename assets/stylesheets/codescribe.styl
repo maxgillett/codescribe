@@ -58,9 +58,6 @@ header_color = lighten(#343434, 15)
 	font-weight: bold
 	font-size: 16px
 
-#container #navigation .no-border
-	border-bottom: 0px
-
 #navigation .text
 	display: block
 	padding: 10px 0px 10px 15px
@@ -94,13 +91,27 @@ header_color = lighten(#343434, 15)
 
 #container #navigation div.active
 	cursor: auto
-	border-right: 1px solid pane_bg
 	border-bottom: 1px solid nav_outer_border
 	border-top: 1px solid nav_outer_border
-	background: linear-gradient(left, darken(pane_bg, 8), pane_bg)
 	color: #f6f5f5
 
+#container #navigation #dashboard.active
+	background: lighten(#527eb4, 15)
 
+#container #navigation #chats.active
+	border-right: 1px solid pane_bg
+	background: linear-gradient(left, darken(pane_bg, 8), pane_bg)
+
+#container #navigation #files.active
+	bg = #a2be8c
+	border-right: 1px solid bg
+	background: linear-gradient(left, darken(bg, 8), bg)
+
+#container #navigation div.no-border-bottom
+	border-bottom: 0px
+
+#container #navigation div.no-border-top
+	border-top: 0px
 
 // Friend list
 
@@ -168,6 +179,9 @@ chat_green = #27832b
 	background: pane_bg
 	border-right: 1px solid nav_outer_border
 	width: 275px
+
+#nav_pane.filelist
+	background: #a2be8c
 
 // To-do: Make scrollbars always behave and appear as they do in Mac OS browsers
 

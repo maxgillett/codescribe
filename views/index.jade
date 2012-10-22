@@ -4,9 +4,9 @@ html
 		title CodeScribe
 		link(rel='stylesheet', href='./stylesheets/codescribe.css')
 		link(rel='stylesheet', href='./javascripts/vendor/codemirror/lib/codemirror.css')
-		script(src='./javascripts/vendor/jquery-1.7.min.js')
+		script(src='./javascripts/vendor/jquery-1.8.2.min.js')
 		script(src='./javascripts/vendor/handlebars-1.0.rc.1.js')
-		script(src='./javascripts/vendor/ember-1.0.pre.js')
+		script(src='./javascripts/vendor/ember.js')
 		script(src='./javascripts/vendor/ember-data.js')
 		script(src='./javascripts/vendor/codemirror/lib/codemirror.js')
 		script(src='./javascripts/vendor/codemirror/lib/util/runmode.js')
@@ -17,19 +17,19 @@ html
 			#header
 			#container
 				#navigation
-					|	<div id="dashboard" {{action goToDashboard}} {{bindAttr class="isChats:no-border"}}>
+					|	<div id="dashboard" {{action goToDashboard}} {{bindAttr class="isChats:no-border-bottom isDashboard:active isDashboard:no-border-top"}}>
 					| 		<div class="text">
 					|			<div class="dash-img"></div>
 					|			<span>Dashboard</span>
 					|		</div>
 					|	</div>
-					|	<div id="chats" {{action goToChats}} {{bindAttr class="isChats:active isChats:white"}}>
+					|	<div id="chats" {{action goToChats}} {{bindAttr class="isChats:active"}}>
 					| 		<div class="text">
-					|			<div class="chats-img"></div>
+					|			<div class="chats-img" {{bindAttr class="isChats:white"}}></div>
 					|			<span>Chats</span>
 					|		</div>
 					|	</div>
-					|	<div id="files">
+					|	<div id="files" {{action goToFiles}} {{bindAttr class="isFiles:active"}} >
 					| 		<div class="text">
 					|			<div class="files-img"></div>
 					|			<span>Files</span>
@@ -69,6 +69,9 @@ html
 					{{ outlet content }}
 
 		script(type='text/x-handlebars', 'data-template-name'='dashboard')
+			#d
+
+		script(type='text/x-handlebars', 'data-template-name'='fileinspector')
 			#d
 
 		script(type='text/x-handlebars', 'data-template-name'='chatlist')
@@ -121,6 +124,19 @@ html
 							span.members Max Levchin
 							span.text Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
 			
+
+
+		script(type='text/x-handlebars', 'data-template-name'='filelist')
+			#nav_pane.filelist
+				#fixed_header	
+					.mag_icon
+					input#search(value='Search chats')
+					#sort
+						div.active Recent 
+						div Categories
+						div Favorites
+				#chat_container
+					
 
 		script(type='text/x-handlebars', 'data-template-name'='chatroom')
 			#message_window

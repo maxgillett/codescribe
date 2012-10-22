@@ -4,9 +4,9 @@
     <title>CodeScribe</title>
     <link rel="stylesheet" href="./stylesheets/codescribe.css"/>
     <link rel="stylesheet" href="./javascripts/vendor/codemirror/lib/codemirror.css"/>
-    <script src="./javascripts/vendor/jquery-1.7.min.js"></script>
+    <script src="./javascripts/vendor/jquery-1.8.2.min.js"></script>
     <script src="./javascripts/vendor/handlebars-1.0.rc.1.js"></script>
-    <script src="./javascripts/vendor/ember-1.0.pre.js"></script>
+    <script src="./javascripts/vendor/ember.js"></script>
     <script src="./javascripts/vendor/ember-data.js"></script>
     <script src="./javascripts/vendor/codemirror/lib/codemirror.js"></script>
     <script src="./javascripts/vendor/codemirror/lib/util/runmode.js"></script>
@@ -18,19 +18,19 @@
       <div id="header"></div>
       <div id="container">
         <div id="navigation">
-          	<div id="dashboard" {{action goToDashboard}} {{bindAttr class="isChats:no-border"}}>
+          	<div id="dashboard" {{action goToDashboard}} {{bindAttr class="isChats:no-border-bottom isDashboard:active isDashboard:no-border-top"}}>
           		<div class="text">
           			<div class="dash-img"></div>
           			<span>Dashboard</span>
           		</div>
           	</div>
-          	<div id="chats" {{action goToChats}} {{bindAttr class="isChats:active isChats:white"}}>
+          	<div id="chats" {{action goToChats}} {{bindAttr class="isChats:active"}}>
           		<div class="text">
-          			<div class="chats-img"></div>
+          			<div class="chats-img" {{bindAttr class="isChats:white"}}></div>
           			<span>Chats</span>
           		</div>
           	</div>
-          	<div id="files">
+          	<div id="files" {{action goToFiles}} {{bindAttr class="isFiles:active"}} >
           		<div class="text">
           			<div class="files-img"></div>
           			<span>Files</span>
@@ -69,6 +69,9 @@
     <script type="text/x-handlebars" data-template-name="dashboard">
       <div id="d"></div>
     </script>
+    <script type="text/x-handlebars" data-template-name="fileinspector">
+      <div id="d"></div>
+    </script>
     <script type="text/x-handlebars" data-template-name="chatlist">
       <div id="nav_pane">
         <div id="fixed_header">	
@@ -98,6 +101,20 @@
             <div class="chat ellipsis">	<span class="members">Max Levchin</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
           </div>
         </div>
+      </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="filelist">
+      <div id="nav_pane" class="filelist">
+        <div id="fixed_header">	
+          <div class="mag_icon"></div>
+          <input id="search" value="Search chats"/>
+          <div id="sort">
+            <div class="active">Recent </div>
+            <div>Categories</div>
+            <div>Favorites</div>
+          </div>
+        </div>
+        <div id="chat_container"></div>
       </div>
     </script>
     <script type="text/x-handlebars" data-template-name="chatroom">
