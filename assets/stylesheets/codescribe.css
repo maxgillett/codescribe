@@ -17,15 +17,24 @@ listing {
 }
 #header {
   width: 100%;
-  height: 45px;
+  height: 40px;
   background: #2f2f2f;
+}
+#header #new-room {
+  cursor: pointer;
+  absolute: top 7px right 7px;
+  font-weight: bold;
+  padding: 5px;
+  background: #e6e7e6;
+  border-radius: 3px;
+  color: #2f2f2f;
 }
 #navigation {
   border-left: 1px solid #929292;
   border-right: 1px solid #929292;
   position: absolute;
   left: 0;
-  top: 45px;
+  top: 40px;
   bottom: 0;
   width: 200px;
   background: #808080;
@@ -69,8 +78,14 @@ listing {
 #navigation .dash-img {
   image: '/images/dash-img.png' 20px 20px;
 }
+#navigation .dash-img.white {
+  image: '/images/dash-img-white.png' 20px 20px;
+}
 #navigation .files-img {
   image: '/images/files-img.png' 20px 20px;
+}
+#navigation .files-img.white {
+  image: '/images/files-img-white.png' 20px 20px;
 }
 #navigation .friends-img {
   image: '/images/friends-img.png' 20px 20px;
@@ -153,7 +168,7 @@ listing {
   background: #27832b;
 }
 #nav_pane {
-  absolute: top 45px left 202px;
+  absolute: top 40px left 202px;
   bottom: 0;
   background: #b4b8c7;
   border-right: 1px solid #929292;
@@ -289,7 +304,7 @@ listing {
 }
 #content {
   position: absolute;
-  top: 45px;
+  top: 40px;
   left: 202px;
   right: 0;
   bottom: 0;

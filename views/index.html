@@ -15,12 +15,12 @@
   </head>
   <body>
     <script type="text/x-handlebars" data-template-name="application">
-      <div id="header"></div>
+      <div id="header">	<div id="new-room" {{action createNewRoom}}>New Room</div></div>
       <div id="container">
         <div id="navigation">
           	<div id="dashboard" {{action goToDashboard}} {{bindAttr class="isChats:no-border-bottom isDashboard:active isDashboard:no-border-top"}}>
           		<div class="text">
-          			<div class="dash-img"></div>
+          			<div class="dash-img" {{bindAttr class="isDashboard:white"}}></div>
           			<span>Dashboard</span>
           		</div>
           	</div>
@@ -32,7 +32,7 @@
           	</div>
           	<div id="files" {{action goToFiles}} {{bindAttr class="isFiles:active"}} >
           		<div class="text">
-          			<div class="files-img"></div>
+          			<div class="files-img" {{bindAttr class="isFiles:white"}}></div>
           			<span>Files</span>
           		</div>
           	</div>
@@ -67,10 +67,10 @@
       </div>
     </script>
     <script type="text/x-handlebars" data-template-name="dashboard">
-      <div id="d">dashboard</div>
+      <div id="d"> </div>
     </script>
     <script type="text/x-handlebars" data-template-name="fileinspector">
-      <div id="d">fileinspector</div>
+      <div id="d"> </div>
     </script>
     <script type="text/x-handlebars" data-template-name="chatlist">
       <div id="nav_pane">

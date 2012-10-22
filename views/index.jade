@@ -15,11 +15,12 @@ html
 	body
 		script(type='text/x-handlebars', 'data-template-name'='application')
 			#header
+				|	<div id="new-room" {{action createNewRoom}}>New Room</div>
 			#container
 				#navigation
 					|	<div id="dashboard" {{action goToDashboard}} {{bindAttr class="isChats:no-border-bottom isDashboard:active isDashboard:no-border-top"}}>
 					| 		<div class="text">
-					|			<div class="dash-img"></div>
+					|			<div class="dash-img" {{bindAttr class="isDashboard:white"}}></div>
 					|			<span>Dashboard</span>
 					|		</div>
 					|	</div>
@@ -31,7 +32,7 @@ html
 					|	</div>
 					|	<div id="files" {{action goToFiles}} {{bindAttr class="isFiles:active"}} >
 					| 		<div class="text">
-					|			<div class="files-img"></div>
+					|			<div class="files-img" {{bindAttr class="isFiles:white"}}></div>
 					|			<span>Files</span>
 					|		</div>
 					|	</div>
@@ -69,10 +70,10 @@ html
 					{{ outlet content }}
 
 		script(type='text/x-handlebars', 'data-template-name'='dashboard')
-			#d dashboard
+			#d 
 
 		script(type='text/x-handlebars', 'data-template-name'='fileinspector')
-			#d fileinspector
+			#d 
 
 		script(type='text/x-handlebars', 'data-template-name'='chatlist')
 			#nav_pane

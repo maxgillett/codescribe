@@ -15,12 +15,11 @@ function stateFlag(name) {
 
 App = Em.Application.create({
 
-	autoinit: false,
-
 	ApplicationController: Ember.Controller.extend({
 		isDashboard: stateFlag('index'),
 		isChats: stateFlag('chats'),
-		isFiles: stateFlag('files')
+		isFiles: stateFlag('files'),
+		animate: true
   	}),
   	ApplicationView: Ember.View.extend({
     	templateName: 'application'
@@ -31,7 +30,7 @@ App = Em.Application.create({
   	ChatlistView:  Em.View.extend({
   		templateName:  'chatlist',
   		didInsertElement: function(){
-  			var doAnimation = this.get("controller").content.animate
+  			var doAnimation = App.router.get("applicationController").get("animate")
   			  , that = this
 
   			if (doAnimation) {
@@ -48,7 +47,7 @@ App = Em.Application.create({
 			}
     	},
     	willDestroyElement: function() {
-  			var doAnimation = this.get("controller").content.animate
+  			var doAnimation = App.router.get("applicationController").get("animate")
   			  , that = this
 
   			if (doAnimation) {
@@ -83,7 +82,7 @@ App = Em.Application.create({
   	FileListView:  Em.View.extend({
   		templateName:  'filelist',
   		didInsertElement: function(){
-  			var doAnimation = this.get("controller").content.animate
+  			var doAnimation = App.router.get("applicationController").get("animate")
   			  , that = this
 
 	  		if (doAnimation) {
@@ -100,10 +99,8 @@ App = Em.Application.create({
 			}
     	},
     	willDestroyElement: function() {
-  			var doAnimation = this.get("controller").content.animate
+  			var doAnimation = App.router.get("applicationController").get("animate")
   			  , that = this
-
-  			console.log('doAnimation: ',doAnimation);
 
 	  		if (doAnimation) {
 	    		var clone = this.$("#nav_pane").clone();
@@ -130,7 +127,7 @@ App = Em.Application.create({
   		enableLogging: true,
   		targetState: "",
   		goToDashboard:  function() {
-  			this.set("targetState", "index");
+  			this.set("targetState", "index"); // Is there a better way to do this?
   			App.router.transitionTo('root.index');
   		},
   		goToChats:  function() {
@@ -140,6 +137,10 @@ App = Em.Application.create({
   		goToFiles:  function() {
   			this.set("targetState", "files");
 			App.router.transitionTo('root.files')
+		},
+		createNewRoom:  function() {
+			this.set("targetState", "chats");
+			App.router.transitionTo('root.chats.create')
 		},
 	    root:  Ember.Route.extend({
 	    	index:  Ember.Route.extend({
@@ -153,38 +154,40 @@ App = Em.Application.create({
         		exit: function(router) {
         			// If target state is index, then animate destruction of element
         			var animate = (App.router.targetState == "index") ? true : false;
-        			router.get('chatlistController').set('content', {animate: animate});
+        			router.get("applicationController").set("animate", animate);
         			router.get('applicationController').disconnectOutlet('navpane');
         		},
         		enter: function(router) {
+        			// If current state is index, then animate element
 		        	var currentState = router.get('currentState.name');
         			var animate = (currentState == "index") ? true : false;
-		        	this.set("animate", animate)
+		        	router.get("applicationController").set("animate", animate);
 		        },
 		        connectOutlets: function(router, context) {
-		        	var doAnimate = this.get("animate");
-        			router.get('applicationController').connectOutlet('navpane', 'chatlist', {animate: doAnimate});
-        			router.get('applicationController').connectOutlet('content', 'chatroom', {animate: doAnimate});
-        		}
+        			router.get('applicationController').connectOutlet('navpane', 'chatlist');
+        			router.get('applicationController').connectOutlet('content', 'chatroom');
+        		},
+        		create: Em.Route.extend({
+        			route:  '/create'
+        		})
         	}),
         	files:  Em.Route.extend({
         		route:  '/files',
         		exit: function(router) {
         			// If target state is index, then animate destruction of element
         			var animate = (App.router.targetState == "index") ? true : false;
-        			router.get('fileListController').set('content', {animate: animate});
+        			router.get("applicationController").set("animate", animate);
         			router.get('applicationController').disconnectOutlet('navpane');
         		},
         		enter: function(router) {
+        			// If current state is index, then animate element
 		        	var currentState = router.get('currentState.name');
-		        	console.log(currentState);
         			var animate = (currentState == "index") ? true : false;
-		        	this.set("animate", animate)
+		        	router.get("applicationController").set("animate", animate);
 		        },
 		        connectOutlets: function(router, context) {
-		        	var doAnimate = this.get("animate");
-        			router.get('applicationController').connectOutlet('navpane', 'fileList', {animate: doAnimate});
-        			router.get('applicationController').connectOutlet('content', 'fileInspector', {animate: doAnimate});
+        			router.get('applicationController').connectOutlet('navpane', 'fileList');
+        			router.get('applicationController').connectOutlet('content', 'fileInspector');
         		}
         	})
 	    })

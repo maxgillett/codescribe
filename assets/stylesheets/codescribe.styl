@@ -14,7 +14,7 @@ pre, xmp, plaintext, listing {
 }
 
 
-header_height = 45px
+header_height = 40px
 nav_width = 200px
 nav_outer_border = #929292
 nav_item_height = 50px
@@ -30,7 +30,14 @@ header_color = lighten(#343434, 15)
 	height: header_height
 	background: #2f2f2f
 
-
+#header #new-room
+	cursor: pointer;
+	absolute: top 7px right 7px
+	font-weight: bold;
+	padding: 5px
+	background: #E6E7E6
+	border-radius: 3px
+	color: off_black
 
 // Navigation
 
@@ -78,8 +85,14 @@ header_color = lighten(#343434, 15)
 #navigation .dash-img
 	image: '/images/dash-img.png' 20px 20px
 
+#navigation .dash-img.white
+	image: '/images/dash-img-white.png' 20px 20px
+
 #navigation .files-img
 	image: '/images/files-img.png' 20px 20px
+
+#navigation .files-img.white
+	image: '/images/files-img-white.png' 20px 20px
 
 #navigation .friends-img
 	image: '/images/friends-img.png' 20px 20px
