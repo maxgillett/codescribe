@@ -15,6 +15,8 @@ function stateFlag(name) {
 
 App = Em.Application.create({
 
+	autoinit: false,
+
 	ApplicationController: Ember.Controller.extend({
 		isDashboard: stateFlag('index'),
 		isChats: stateFlag('chats'),
@@ -71,7 +73,6 @@ App = Em.Application.create({
   		templateName:  'chatroom'
   	}),
   	DashboardController:  Em.Controller.extend({
-
   	}),
   	DashboardView:  Em.View.extend({
   		templateName:  'dashboard'
@@ -127,20 +128,56 @@ App = Em.Application.create({
   	Router: Ember.Router.extend({
   		//location: 'history',
   		enableLogging: true,
-  		goToDashboard:  Ember.Route.transitionTo('root.index'),
-  		goToChats:  Ember.Route.transitionTo('root.chats'),
-  		goToFiles:  Em.Route.transitionTo('root.files'),
+  		targetState: "",
+  		goToDashboard:  function() {
+  			this.targetState = "index";
+  			App.router.transitionTo('root.index');
+  		},
+  		goToChats:  function() {
+  			this.targetState = "chats";
+  			App.router.transitionTo('root.chats')
+  		},
+  		goToFiles:  function() {
+  			this.targetState = "files";
+			App.router.transitionTo('root.files')
+		},
 	    root:  Ember.Route.extend({
 	    	index:  Ember.Route.extend({
         		route:  '/',
-        		connectOutlets: function(router, context) {
-        			router.get('applicationController').connectOutlet('content', 'dashboard');
-        		}
+        		enter: function(router) {
+        			var currentState = router.get('currentState.name');
+		        	if (currentState == "root") {
+		        		Ember.run.next(function() {
+		        			// If entering from root, do not animate.
+		        			router.transitionTo('index.swap');
+			            });
+		        	} else {
+		        		Ember.run.next(function() {
+		        			// If not entering from files, animate.
+		        			router.transitionTo('index.animate');
+			            });
+		        	}
+        		},
+        		swap:  Em.Route.extend({
+		        	connectOutlets: function(router, context) {
+        				router.get('applicationController').connectOutlet('content', 'dashboard', {animate: false});
+        			}
+        		}),
+        		animate:  Em.Route.extend({
+		        	connectOutlets: function(router, context) {
+        				router.get('applicationController').connectOutlet('content', 'dashboard', {animate: true});
+        			}
+        		}),
         	}),
         	chats:  Em.Route.extend({
         		route:  '/chats',
         		exit: function(router) {
-        			router.get('chatlistController').set('content', {animate: false});
+        			// If target state is index, then animate
+        			if (App.router.targetState == "index") {
+        				router.get('chatlistController').set('content', {animate: true});
+        			} else {
+        				router.get('chatlistController').set('content', {animate: false});
+        			}
         			router.get('applicationController').disconnectOutlet('navpane');
         		},
         		enter: function(router) {
@@ -150,13 +187,11 @@ App = Em.Application.create({
 		        		Ember.run.next(function() {
 		        			// If entering from files, do not animate.
 		        			router.transitionTo('chats.swap');
-		        			console.log("DO NOT ANIMATE");
 			            });
 		        	} else {
 		        		Ember.run.next(function() {
 		        			// If not entering from files, animate.
 		        			router.transitionTo('chats.animate');
-		        			console.log("ANIMATE");
 			            });
 		        	}
 		        },
@@ -176,7 +211,12 @@ App = Em.Application.create({
         	files:  Em.Route.extend({
         		route:  '/files',
         		exit: function(router) {
-        			router.get('fileListController').set('content', {animate: false});
+        			// If target state is index, then animate
+        			if (App.router.targetState == "index") {
+        				router.get('fileListController').set('content', {animate: true});
+        			} else {
+        				router.get('fileListController').set('content', {animate: false});
+        			}
         			router.get('applicationController').disconnectOutlet('navpane');
         		},
         		enter: function(router) {
