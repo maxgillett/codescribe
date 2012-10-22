@@ -130,122 +130,62 @@ App = Em.Application.create({
   		enableLogging: true,
   		targetState: "",
   		goToDashboard:  function() {
-  			this.targetState = "index";
+  			this.set("targetState", "index");
   			App.router.transitionTo('root.index');
   		},
   		goToChats:  function() {
-  			this.targetState = "chats";
+  			this.set("targetState", "chats");
   			App.router.transitionTo('root.chats')
   		},
   		goToFiles:  function() {
-  			this.targetState = "files";
+  			this.set("targetState", "files");
 			App.router.transitionTo('root.files')
 		},
 	    root:  Ember.Route.extend({
 	    	index:  Ember.Route.extend({
         		route:  '/',
-        		enter: function(router) {
-        			var currentState = router.get('currentState.name');
-		        	if (currentState == "root") {
-		        		Ember.run.next(function() {
-		        			// If entering from root, do not animate.
-		        			router.transitionTo('index.swap');
-			            });
-		        	} else {
-		        		Ember.run.next(function() {
-		        			// If not entering from files, animate.
-		        			router.transitionTo('index.animate');
-			            });
-		        	}
-        		},
-        		swap:  Em.Route.extend({
-		        	connectOutlets: function(router, context) {
-        				router.get('applicationController').connectOutlet('content', 'dashboard', {animate: false});
-        			}
-        		}),
-        		animate:  Em.Route.extend({
-		        	connectOutlets: function(router, context) {
-        				router.get('applicationController').connectOutlet('content', 'dashboard', {animate: true});
-        			}
-        		}),
+        		connectOutlets: function(router, context) {
+        			router.get('applicationController').connectOutlet('content', 'dashboard');
+        		}
         	}),
         	chats:  Em.Route.extend({
         		route:  '/chats',
         		exit: function(router) {
-        			// If target state is index, then animate
-        			if (App.router.targetState == "index") {
-        				router.get('chatlistController').set('content', {animate: true});
-        			} else {
-        				router.get('chatlistController').set('content', {animate: false});
-        			}
+        			// If target state is index, then animate destruction of element
+        			var animate = (App.router.targetState == "index") ? true : false;
+        			router.get('chatlistController').set('content', {animate: animate});
         			router.get('applicationController').disconnectOutlet('navpane');
         		},
         		enter: function(router) {
-		        	console.log("entering root.chats", router.get('currentState.parentState.name'));
-		        	var currentState = router.get('currentState.parentState.name');
-		        	if (currentState == "files") {
-		        		Ember.run.next(function() {
-		        			// If entering from files, do not animate.
-		        			router.transitionTo('chats.swap');
-			            });
-		        	} else {
-		        		Ember.run.next(function() {
-		        			// If not entering from files, animate.
-		        			router.transitionTo('chats.animate');
-			            });
-		        	}
+		        	var currentState = router.get('currentState.name');
+        			var animate = (currentState == "index") ? true : false;
+		        	this.set("animate", animate)
 		        },
-		        swap:  Em.Route.extend({
-		        	connectOutlets: function(router, context) {
-        				router.get('applicationController').connectOutlet('navpane', 'chatlist', {animate: false});
-        				router.get('applicationController').connectOutlet('content', 'chatroom', {animate: false});
-        			}
-		        }),
-		        animate:  Em.Route.extend({
-		        	connectOutlets:  function(router, context) {
-		        		router.get('applicationController').connectOutlet('navpane', 'chatlist', {animate: true});
-		        		router.get('applicationController').connectOutlet('content', 'chatroom', {animate: true});
-		        	}
-		        })
+		        connectOutlets: function(router, context) {
+		        	var doAnimate = this.get("animate");
+        			router.get('applicationController').connectOutlet('navpane', 'chatlist', {animate: doAnimate});
+        			router.get('applicationController').connectOutlet('content', 'chatroom', {animate: doAnimate});
+        		}
         	}),
         	files:  Em.Route.extend({
         		route:  '/files',
         		exit: function(router) {
-        			// If target state is index, then animate
-        			if (App.router.targetState == "index") {
-        				router.get('fileListController').set('content', {animate: true});
-        			} else {
-        				router.get('fileListController').set('content', {animate: false});
-        			}
+        			// If target state is index, then animate destruction of element
+        			var animate = (App.router.targetState == "index") ? true : false;
+        			router.get('fileListController').set('content', {animate: animate});
         			router.get('applicationController').disconnectOutlet('navpane');
         		},
         		enter: function(router) {
-        			console.log("entering root.files from", router.get('currentState.parentState.name'));
-		        	var currentState = router.get('currentState.parentState.name');
-		        	if (currentState == "chats") {
-		        		Ember.run.next(function() {
-		        			// If entering from chats, do not animate.
-		        			router.transitionTo('files.swap');
-			            });
-		        	} else {
-		        		Ember.run.next(function() {
-		        			// If not entering from chats, animate.
-		        			router.transitionTo('files.animate');
-			            });
-		        	}
+		        	var currentState = router.get('currentState.name');
+		        	console.log(currentState);
+        			var animate = (currentState == "index") ? true : false;
+		        	this.set("animate", animate)
 		        },
-		        swap:  Em.Route.extend({
-		        	connectOutlets: function(router, context) {
-        			router.get('applicationController').connectOutlet('navpane', 'fileList', {animate: false});
-        			router.get('applicationController').connectOutlet('content', 'fileInspector', {animate: false});
-        			}
-		        }),
-		        animate:  Em.Route.extend({
-		        	connectOutlets:  function(router, context) {
-        			router.get('applicationController').connectOutlet('navpane', 'fileList', {animate: true});
-        			router.get('applicationController').connectOutlet('content', 'fileInspector', {animate: true});
-		        	}
-		        })
+		        connectOutlets: function(router, context) {
+		        	var doAnimate = this.get("animate");
+        			router.get('applicationController').connectOutlet('navpane', 'fileList', {animate: doAnimate});
+        			router.get('applicationController').connectOutlet('content', 'fileInspector', {animate: doAnimate});
+        		}
         	})
 	    })
 	})
