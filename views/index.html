@@ -72,7 +72,7 @@
     <script type="text/x-handlebars" data-template-name="fileinspector">
       <div id="d"> </div>
     </script>
-    <script type="text/x-handlebars" data-template-name="chatlist">
+    <script type="text/x-handlebars" data-template-name="chatpane">
       <div id="nav_pane">
         <div id="fixed_header">	
           <div class="mag_icon"></div>
@@ -84,21 +84,29 @@
           </div>
         </div>
         <div id="chat_container">
-          <h2> <span>Today</span><span>3 chats</span></h2>
+          <h2> <span>Today</span><span>{{controller.length}} chats</span></h2>
           <div id="group">
-            <div class="chat ellipsis"><span class="members">Zach Sherman + 3 more</span><span class="time">9:15pm</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit,  consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
-            <div class="chat ellipsis"><span class="members">Elon Musk</span><span class="time">1:04pm</span><span class="text">zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
-            <div class="chat ellipsis"><span class="members">Max Levchin</span><span class="time">10:04am</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco itation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
+            	{{#each chat in controller}}
+            		{{#with chat}}
+            			<div class="chat ellipsis" {{ action showChat this }}>
+            				<span class="members">{{name}}</span>
+            				<span class="time">{{time}}</span>
+            				<span class="text">{{message}}</span>
+            			</div>
+            		{{/with}}
+            	{{/each}}
           </div>
-          <h2> <span>Yesterday</span><span>2 chats</span></h2>
+          <h2> <span>Yesterday</span><span>{{controller.length}} chats</span></h2>
           <div id="group">
-            <div class="chat ellipsis">	<span class="members">Elon Musk</span><span class="time">Tuesday</span><span class="text">zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco itation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
-            <div class="chat ellipsis"><span class="members">Elon Musk</span><span class="time">Tuesday</span><span class="text">zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
-          </div>
-          <h2> <span>This Week</span><span>2 chats</span></h2>
-          <div id="group">
-            <div class="chat ellipsis"><span class="members">Max Levchin</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco .chat	</span></div>
-            <div class="chat ellipsis">	<span class="members">Max Levchin</span><span class="text">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco </span></div>
+            	{{#each chat in controller}}
+            		{{#with chat}}
+            			<div class="chat ellipsis" {{ action showChat this }}>
+            				<span class="members">{{name}}</span>
+            				<span class="time">{{time}}</span>
+            				<span class="text">{{message}}</span>
+            			</div>
+            		{{/with}}
+            	{{/each}}
           </div>
         </div>
       </div>
@@ -117,8 +125,19 @@
         <div id="chat_container"></div>
       </div>
     </script>
+    <script type="text/x-handlebars" data-template-name="chat">
+      <div id="message">
+        <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
+        <div class="text">
+          <div class="user"> <span class="name">{{ content.name }}</span><span class="time"> - {{ content.time }}</span></div>
+          <div class="msg"><span>{{ content.message }}</span></div>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div id="divider"></div>
+    </script>
     <script type="text/x-handlebars" data-template-name="chatroom">
-      <div id="message_window">
+      <div id="message_window">{{ outlet messages }}
         <div id="message">
           <div class="image"><img src="images/avatar@2x.png" class="profile-img"/></div>
           <div class="text">

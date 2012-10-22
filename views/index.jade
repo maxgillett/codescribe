@@ -75,7 +75,7 @@ html
 		script(type='text/x-handlebars', 'data-template-name'='fileinspector')
 			#d 
 
-		script(type='text/x-handlebars', 'data-template-name'='chatlist')
+		script(type='text/x-handlebars', 'data-template-name'='chatpane')
 			#nav_pane
 				#fixed_header	
 					.mag_icon
@@ -87,44 +87,31 @@ html
 				#chat_container
 					h2 
 						span Today
-						span 3 chats
+						span {{controller.length}} chats
 					#group
-						.chat.ellipsis
-							span.members Zach Sherman + 3 more
-							span.time 9:15pm
-							span.text Lorem ipsum dolor sit amet, consectetur adipisicing elit,  consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-						.chat.ellipsis
-							span.members Elon Musk
-							span.time 1:04pm
-							span.text zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-						.chat.ellipsis
-							span.members Max Levchin
-							span.time 10:04am
-							span.text Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco itation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
+						|	{{#each chat in controller}}
+						| 		{{#with chat}}
+						|			<div class="chat ellipsis" {{ action showChat this }}>
+						|				<span class="members">{{name}}</span>
+						|				<span class="time">{{time}}</span>
+						|				<span class="text">{{message}}</span>
+						|			</div>
+						|		{{/with}}
+						| 	{{/each}}
+
 					h2 
 						span Yesterday
-						span 2 chats
+						span {{controller.length}} chats
 					#group
-						.chat.ellipsis	
-							span.members Elon Musk
-							span.time Tuesday
-							span.text zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco itation ullamco sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-						.chat.ellipsis
-							span.members Elon Musk
-							span.time Tuesday
-							span.text zksherm: Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-						
-					h2 
-						span This Week
-						span 2 chats
-					#group
-						.chat.ellipsis
-							span.members Max Levchin
-							span.text Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco .chat	
-						.chat.ellipsis	
-							span.members Max Levchin
-							span.text Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-			
+						|	{{#each chat in controller}}
+						| 		{{#with chat}}
+						|			<div class="chat ellipsis" {{ action showChat this }}>
+						|				<span class="members">{{name}}</span>
+						|				<span class="time">{{time}}</span>
+						|				<span class="text">{{message}}</span>
+						|			</div>
+						|		{{/with}}
+						| 	{{/each}}
 
 
 		script(type='text/x-handlebars', 'data-template-name'='filelist')
@@ -138,9 +125,24 @@ html
 						div Favorites
 				#chat_container
 					
+		script(type='text/x-handlebars', 'data-template-name'='chat')
+			#message
+					.image
+						img(class='profile-img', src='images/avatar@2x.png')
+					.text
+						.user 
+							span.name {{ content.name }}
+							span.time  - {{ content.time }}
+						.msg
+							span {{ content.message }}
+					.clearfix
+				#divider
+
+
 
 		script(type='text/x-handlebars', 'data-template-name'='chatroom')
 			#message_window
+				{{ outlet messages }}
 				#message
 					.image
 						img(class='profile-img', src='images/avatar@2x.png')
