@@ -3743,7 +3743,7 @@ var hasAssociation = function(type, options, one) {
       type = get(this, type, false) || get(window, type);
     }
 
-    id = data[key];
+    id = options.embedded ? store.load(type, data[key]).id : data[key];
     return id ? store.find(type, id) : null;
   }).property('data').cacheable().meta(meta);
 };
@@ -3811,7 +3811,7 @@ var hasAssociation = function(type, options) {
       type = get(this, type, false) || get(window, type);
     }
 
-    ids = data[key];
+    ids = options.embedded ? store.loadMany(type, data[key]).ids : data[key];
     association = store.findMany(type, ids || [], this, meta);
     set(association, 'owner', this);
     set(association, 'name', key);

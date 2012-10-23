@@ -146,7 +146,9 @@ App = Em.Application.create({
 		},
 		createNewRoom:  function() {
 			this.set("targetState", "chats");
-			App.router.transitionTo('root.chats.create')
+			App.store.createRecord(App.Chat,  { name: "Maxwell Gillett" });
+			App.store.commit();
+			App.router.transitionTo('root.chats.create');
 		},
 	    root:  Ember.Route.extend({
 	    	dashboard:  Ember.Route.extend({
@@ -164,8 +166,11 @@ App = Em.Application.create({
         		chat: Ember.Route.extend({
         			route: '/:id',
         			connectOutlets: function(router, chat) {
-        				router.get('chatroomController').connectOutlet('messages', 'chat', chat);
+        				router.get('chatroomController').connectOutlet('messages', 'chat', App.store.find(App.Chat, chat.id));
         			}
+        		}),
+        		create:  Ember.Route.extend({
+        			route: '/new'
         		}),
         		exit: function(router) {
         			// If target state is index, then animate destruction of element
@@ -181,7 +186,7 @@ App = Em.Application.create({
 		        	router.get("applicationController").set("animate", animate);
 		        },
 		        connectOutlets: function(router, context) {
-        			router.get('applicationController').connectOutlet('navpane', 'chatpane', App.Chat.all());
+        			router.get('applicationController').connectOutlet('navpane', 'chatpane', App.store.findAll(App.Chat));
         			router.get('applicationController').connectOutlet('content', 'chatroom');
         		},
         	}),
@@ -208,29 +213,161 @@ App = Em.Application.create({
 	})
 });
 
+// Configure sockets
+
+var socket = io.connect('http://localhost:3000');
+
+// Sockets adapter
+
+App.adapter = DS.Adapter.create({
+	find:  function(store, type, id) {
+		var url = type.url;
+		url = url.fmt(id);
+
+		socket.emit('find', url, function(data){
+			store.load(type, id, data);
+		})
+	},
+	findAll: function(store, type, id) {
+		console.log(type.url)
+		var url = type.url;
+		url = url.fmt(id);
+
+		socket.emit('find', url, function(data){
+			store.load(type, id, data);
+		})
+	},
+	findMany:  function(store, type, ids) {
+		var url = type.url;
+		url = url.fmt(ids.join(','));
+
+		socket.emit('findMany', url, function(data) {
+			store.loadMany(type, ids, data);
+		})
+	},
+	findQuery:  function(store, type, query, modelArray) {
+		// Implement this function
+	},
+	createRecord:  function(store, type, model) {
+		console.log("TRYING TO CREATE RECORD");
+		var url = type.url
+		url = url.fmt(model.get('id)'));
+		var data = model.get('data');
+
+		socket.emit('createRecord', 'url', 'data', function(response) {
+			// On success...
+
+			if (response.success) {
+				store.didCreateRecord(model, response.data)
+			}
+		})
+	},
+	updateRecord:  function(store, type, model) {
+		var url = type.url;
+
+		socket.emit('updateRecord', url, data, function(response) {
+			// On success...
+			if (response.success) {
+				store.didUpdateRecord(model, response.data)
+			}
+		})
+	}
+});
+
+// Store
+
+App.store = DS.Store.create({
+	revision: 6,
+	adapter: App.adapter
+});
+
 // Models
 
-App.Chat = Ember.Object.extend();
-App.Chat.reopenClass({
-  _listOfChats:  Em.A(),
-  all:  function(){
-    var allChats = this._listOfChats;
-    // Stub an ajax call; like a jQuery.ajax might have done...
-    setTimeout( function(){
-      allChats.clear();
-      allChats.pushObjects([
-          { id: '1', name: "Max Gillett", time: "9:15pm", message: 'San Clemente style Lorem ipsum dolor sit amet, consectetur adipisicing  sed do eiusmod tempor incididunt uCruz say this word onceelit, sed do eiusmod tempor incididunt u' },
-          { id: '2', name: "John Doe", time: "10:14pm",  message: 'I heard Pénèlope ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt uCruz say this word once.' },
-          { id: '3', name: "Jane Doe", time: "1:47am",  message: 'The King would never Lorem ipsum dolor sit amet, consectetur adipisicing sed do eiusmod tempor incididunt uCruz say this word once elit, sed do eiusmod tempor incididunt u lie' },
-          { id: '4', name: "Jonathan Doe", time: "1:47am",  message: 'The King would never Lorem ipsum dolor sit amet, consectetur adipisicing sed do eiusmod tempor incididunt uCruz say this word once elit, sed do eiusmod tempor incididunt u lie' }
-        ]);
-    }, 1);
-    return this._listOfChats;
-  },
-  find:  function(id){
-    return this._stubDataSource.findProperty('id', id);
-  }
+App.Message = DS.Model.extend({
+	name: DS.attr('string'),
+	msg: DS.attr('string'),
+	time: DS.attr('string'),
+	chat: DS.belongsTo('App.Chat')
 });
+
+App.Message.reopenClass({
+    url: '/message/%@'
+});
+
+App.Chat = DS.Model.extend({
+	url: '/people/%@',
+    name: DS.attr('string'),
+    avatar: DS.attr('string'),
+	messages: DS.hasMany('App.Message', {embedded: true,}),
+	preview: function() {
+		try {
+			return this.get('messages').get("firstObject").get("msg") 
+		} catch(e) {
+			return "Send a message"
+		}
+	}.property('messages')
+});
+
+App.Chat.reopenClass({
+    url: '/chat/%@'
+});
+
+
+// Bootstrapping some data for testing purposes
+App.store.loadMany(App.Chat, [{ id: 1,
+								name: 'John Doe',
+								avatar: 'test2',
+								messages: [
+									{
+									id: 1,
+									name: 'John Doe',
+									msg: 'This is a test post one two three. This is a te two three. This is a test post one two three. This is a test post one two three',
+									time: '1:10pm'
+									},{
+									id: 2,
+									name: 'John Doe',
+									msg: ' This is another test post sicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis no three two one',
+									time: '1:15pm'
+									},{
+									id: 4,
+									name: 'John Doe',
+									msg: 'This is a test post one two three. This is a te two three. This is a test post one two three. This is a test post one two three',
+									time: '1:10pm'
+									},{
+									id: 5,
+									name: 'John Doe',
+									msg: ' This is another test post sicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis no three two one',
+									time: '1:35pm'
+									}
+								]
+							 },
+							 {  id: 2,
+								name: 'Jane Doe',
+								avatar: 'test',
+								messages: [
+									{
+									id: 6,
+									name: 'Jane Doe',
+									msg: 'This is a test post one two three. This is a test post one two three. This is a test post one two three. This is a test post one two three. This is a test post one two three',
+									time: '1:10pm'
+									},{
+									id: 7,
+									name: 'Jane Doe',
+									msg: ' This is another test post three two one',
+									time: '1:15pm'
+									}
+								]
+							 }]);
+
+
+
+
+
+
+// var b = App.store.find(App.Chat, 1);
+// console.log(b.get("name")) // Foo Bar
+// console.log(b.get("messages").get("content")) // []  (an empty array)
+
 
 // Views
 

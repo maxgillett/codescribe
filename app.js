@@ -1,4 +1,8 @@
 var express = require('express')
+  , app = exports.app = express()
+  , http = require('http')
+  , server = http.createServer(app)
+  , io = require('socket.io').listen(server)
   , config = require('./config.json')
   , passport = require('passport')
   , GitHubStrategy = require('passport-github').Strategy
@@ -9,8 +13,14 @@ var express = require('express')
   , mongo = require('mongodb')
   , mongoose = require('mongoose')
   , redis = require('redis')
-  , RedisStore = require('connect-redis')(express)
-  , io = require('socket.io').listen(app);
+  , RedisStore = require('connect-redis')(express);
+
+io.sockets.on('connection', function (socket) {
+  console.log("socket connection");
+  socket.on('createRecord', function (url, data, fn) {
+    fn(url + data);
+  });
+});
 
 var db = mongoose.createConnection('localhost', 'test');
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -77,8 +87,6 @@ var sessionStore = exports.sessionStore = new RedisStore({client: redisClient});
 
 // Create and configure express app
 
-var app = exports.app = express();
-
 app.configure(function() {
   this.set('view engine', 'jade');
   this.set('views', "views");
@@ -109,5 +117,5 @@ app.configure(function() {
 
 require('./routes');
 
-app.listen(3000);
+server.listen(3000);
 console.log('Listening on port 3000');
