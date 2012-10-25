@@ -140,23 +140,32 @@ App = Em.Application.create({
   			this.set("targetState", "chats");
   			App.router.transitionTo('root.chats.index')
   		},
+  		goToChat:  function(chat) {
+  			this.set("targetState", "chats");
+  			App.router.transitionTo('root.chats.chat', chat)
+  		},
   		goToFiles:  function() {
   			this.set("targetState", "files");
-			App.router.transitionTo('root.files')
-		},
-		createNewRoom:  function() {
-			this.set("targetState", "chats");
-			App.store.createRecord(App.Chat,  { name: "Maxwell Gillett" });
-			App.store.commit();
-			App.router.transitionTo('root.chats.create');
-		},
+        App.router.transitionTo('root.files')
+  		},
+  		createNewRoom:  function() {
+  			this.set("targetState", "chats");
+  			
+  			var toChats = function() {
+  				App.router.transitionTo('root.chats.chat', chat);
+  			};
+
+  			var chat = App.store.createRecord(App.Chat,  { name: "Maxwell Gillett", participants: ["508730e72276050000000002"] });
+  			chat.addObserver('id', this, toChats);
+  			App.store.commit();
+  		},
 	    root:  Ember.Route.extend({
 	    	dashboard:  Ember.Route.extend({
-        		route:  '/',
-        		connectOutlets: function(router, context) {
-        			router.get('applicationController').connectOutlet('content', 'dashboard');
-        		}
-        	}),
+      		route:  '/',
+      		connectOutlets: function(router, context) {
+      			router.get('applicationController').connectOutlet('content', 'dashboard');
+      		}
+        }),
         	chats:  Em.Route.extend({
         		showChat:  Em.Route.transitionTo('chats.chat'),
         		route:  '/chats',
@@ -166,6 +175,7 @@ App = Em.Application.create({
         		chat: Ember.Route.extend({
         			route: '/:id',
         			connectOutlets: function(router, chat) {
+        				console.log(chat.id);
         				router.get('chatroomController').connectOutlet('messages', 'chat', App.store.find(App.Chat, chat.id));
         			}
         		}),
@@ -219,67 +229,158 @@ var socket = io.connect('http://localhost:3000');
 
 // Sockets adapter
 
-App.adapter = DS.Adapter.create({
+App.SOCKETadapter = DS.Adapter.extend({
+
 	find:  function(store, type, id) {
-		var url = type.url;
-		url = url.fmt(id);
+		var that = this;
 
-		socket.emit('find', url, function(data){
-			store.load(type, id, data);
-		})
+    socket.emit('find', type.toString(), id, function(response) {
+      console.log(response);
+      if (response.success) {
+        that.didFindRecord(store, type, response.json)
+      }
+    })
 	},
-	findAll: function(store, type, id) {
-		console.log(type.url)
-		var url = type.url;
-		url = url.fmt(id);
 
-		socket.emit('find', url, function(data){
-			store.load(type, id, data);
-		})
-	},
-	findMany:  function(store, type, ids) {
-		var url = type.url;
-		url = url.fmt(ids.join(','));
+  didFindRecord: function(store, type, json) {
+    var root = type.toString().replace('App.', '').toLowerCase(); // extract this into rootForType function
 
-		socket.emit('findMany', url, function(data) {
-			store.loadMany(type, ids, data);
-		})
-	},
-	findQuery:  function(store, type, query, modelArray) {
-		// Implement this function
-	},
-	createRecord:  function(store, type, model) {
-		console.log("TRYING TO CREATE RECORD");
-		var url = type.url
-		url = url.fmt(model.get('id)'));
-		var data = model.get('data');
+    //this.sideload(store, type, json, root);
+    store.load(type, json[root]);
+  },
 
-		socket.emit('createRecord', 'url', 'data', function(response) {
-			// On success...
+	findAll: function(store, type) {
+		var that = this;
 
+		socket.emit('findAll', type.toString(), function(response) {
+			console.log(response);
 			if (response.success) {
-				store.didCreateRecord(model, response.data)
+				that.didFindAll(store, type, response.json)
 			}
 		})
 	},
+
+	didFindAll: function(store, type, json) {
+		var root = type.toString().replace('App.', '').toLowerCase(); // extract into rootForType function and call pluralize
+
+	  //this.sideload(store, type, json, root);
+	  store.loadMany(type, json[root]);
+
+	  store.didUpdateAll(type);
+	},
+
+	findMany:  function(store, type, ids) {
+		// Implement this function
+	},
+
+	findQuery:  function(store, type, query, modelArray) {
+		// Implement this function
+	},
+
+	createRecord:  function(store, type, record) {
+		var that = this;
+	    var data = this.toJSON(record);
+
+		socket.emit('createRecord', type.toString(), data, function(response) {
+			if (response.success) {
+				that.didCreateRecord(store, type, record, response.json);
+			}
+		})
+	},
+
+	didCreateRecord: function(store, type, record, json) {
+		var root = type.toString().replace('App.', '').toLowerCase();
+
+    	//this.sideload(store, type, data, root);
+    	store.didSaveRecord(record, json[root]);
+  	},
+
+  	sideload: function(store, type, json, root) {
+	    var sideloadedType, mappings, loaded = {};
+
+	    loaded[root] = true;
+
+	    for (var prop in json) {
+			if (!json.hasOwnProperty(prop)) { continue; }
+			if (prop === root) { continue; }
+			if (prop === get(this, 'meta')) { continue; }
+
+			sideloadedType = type.typeForAssociation(prop);
+
+			if (!sideloadedType) {
+				mappings = get(this, 'mappings');
+				Ember.assert("Your server returned a hash with the key " + prop + " but you have no mappings", !!mappings);
+
+				sideloadedType = get(mappings, prop);
+
+				if (typeof sideloadedType === 'string') {
+				  sideloadedType = get(window, sideloadedType);
+				}
+
+	        	Ember.assert("Your server returned a hash with the key " + prop + " but you have no mapping for it", !!sideloadedType);
+	    	}
+
+	    	this.sideloadAssociations(store, sideloadedType, json, prop, loaded);
+	    }
+	},
+
+	sideloadAssociations: function(store, type, json, prop, loaded) {
+		loaded[prop] = true;
+
+		get(type, 'associationsByName').forEach(function(key, meta) {
+	  		key = meta.key || key;
+	  		if (meta.kind === 'belongsTo') {
+	    		key = this.pluralize(key);
+	  		}
+	  		if (json[key] && !loaded[key]) {
+	    		this.sideloadAssociations(store, meta.type, json, key, loaded);
+	  		}
+		}, this);
+
+		this.loadValue(store, type, json[prop]);
+	},
+
+	loadValue: function(store, type, value) {
+		if (value instanceof Array) {
+			store.loadMany(type, value);
+		} else {
+			store.load(type, value);
+		}
+	},
+
 	updateRecord:  function(store, type, model) {
+		var that = this;
 		var url = type.url;
 
 		socket.emit('updateRecord', url, data, function(response) {
 			// On success...
 			if (response.success) {
-				store.didUpdateRecord(model, response.data)
+				that.didUpdateRecord(model, response.data)
 			}
 		})
-	}
+	},
+
+
 });
+
+
+// Mapping
+
+App.SOCKETadapter.map("App.Chat", { primaryKey: "_id" });
+
 
 // Store
 
 App.store = DS.Store.create({
 	revision: 6,
-	adapter: App.adapter
+	adapter: App.SOCKETadapter.create({
+		mappings: {
+     		 // all your models will have to have a mapping defined like this
+      		chat: 'App.Chat'
+    	}
+	})
 });
+
 
 // Models
 
@@ -295,28 +396,30 @@ App.Message.reopenClass({
 });
 
 App.Chat = DS.Model.extend({
-	url: '/people/%@',
+	primaryKey: '_id',
     name: DS.attr('string'),
+    created_at: DS.attr('string'),
     avatar: DS.attr('string'),
+    participants: DS.attr('string'),
 	messages: DS.hasMany('App.Message', {embedded: true,}),
 	preview: function() {
 		try {
 			return this.get('messages').get("firstObject").get("msg") 
 		} catch(e) {
-			return "Send a message"
+			return "No messages yet"
 		}
 	}.property('messages')
 });
 
-App.Chat.reopenClass({
-    url: '/chat/%@'
-});
+// Define the mappings
 
 
 // Bootstrapping some data for testing purposes
-App.store.loadMany(App.Chat, [{ id: 1,
-								name: 'John Doe',
-								avatar: 'test2',
+
+App.store.loadMany(App.Chat, [{ _id: 1,
+								participants: [{
+									name: 'John Doe'
+								}],
 								messages: [
 									{
 									id: 1,
@@ -341,9 +444,10 @@ App.store.loadMany(App.Chat, [{ id: 1,
 									}
 								]
 							 },
-							 {  id: 2,
-								name: 'Jane Doe',
-								avatar: 'test',
+							 {  _id: 2,
+								participants: [{
+									name: 'Jane Doe'
+								}],
 								messages: [
 									{
 									id: 6,
@@ -358,19 +462,5 @@ App.store.loadMany(App.Chat, [{ id: 1,
 									}
 								]
 							 }]);
-
-
-
-
-
-
-// var b = App.store.find(App.Chat, 1);
-// console.log(b.get("name")) // Foo Bar
-// console.log(b.get("messages").get("content")) // []  (an empty array)
-
-
-// Views
-
-// Controllers
 
 App.initialize();

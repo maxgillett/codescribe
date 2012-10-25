@@ -13,14 +13,9 @@ var express = require('express')
   , mongo = require('mongodb')
   , mongoose = require('mongoose')
   , redis = require('redis')
-  , RedisStore = require('connect-redis')(express);
-
-io.sockets.on('connection', function (socket) {
-  console.log("socket connection");
-  socket.on('createRecord', function (url, data, fn) {
-    fn(url + data);
-  });
-});
+  , RedisStore = require('connect-redis')(express)
+  , check = require('validator').check
+  , sanitize = require('validator').sanitize;
 
 var db = mongoose.createConnection('localhost', 'test');
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -28,10 +23,77 @@ db.once('open', function () {
   console.log("Mongo db connection established")
 });
 
-// Set up user schema and model
+var utils = {};
+
+utils.verifyAlpha = function(str) {
+  try {
+    check(str).isAlpha();
+  } catch(e) {
+    console.log(e.message);
+    return false
+  }
+};
+
+io.sockets.on('connection', function (socket) {
+  console.log("Socket connection established");
+
+  socket.on('createRecord', function (type, data, fn) {
+    var type = sanitize(type).ltrim("App."); 
+    utils.verifyAlpha(type); 
+    Model[type].create(data, function(err, chat) {
+      if (err) return "Error";
+      var response = {
+        success: true,
+        json: {
+          chat: chat
+        }
+      }
+      fn(response);
+    });
+  });
+
+  socket.on('findAll', function (type, fn) {
+    var type = sanitize(type).ltrim("App.");
+    utils.verifyAlpha(type);
+    Model[type].find({})
+      .populate('participants')
+      .exec(function(err, chats) {
+        console.log(chats);
+        if (err) return "Error";
+        var response = {
+          success: true,
+          json: {
+            chat: chats
+          }
+        }
+        fn(response);
+      });
+  });
+
+  socket.on('find', function (type, id, fn) {
+    var type = sanitize(type).ltrim("App.");
+    utils.verifyAlpha(type);
+    Model[type].findById(id)
+      .populate('participants')
+      .exec(function(err, chat) {
+        console.log(chat);
+        if (err) return "Error";
+        var response = {
+          success: true,
+          json: {
+            chat: chat
+          }
+        }
+        fn(response);
+      });
+  });
+
+});
+
+// Set up mongo schemas and models
 
 var userSchema = new mongoose.Schema({
-  uid: Number,
+  uid: { type: String, unique: true },
   name: String,
   username: String,
   avatar: String
@@ -39,18 +101,32 @@ var userSchema = new mongoose.Schema({
 
 userSchema.statics.findOrCreate = function(data, done) {
   var that = this;
-  var user = this.findOne({id: data.id}, 'name', function(err, user) {
+  var user = this.findOne({uid: data.uid}, 'name', function(err, user) {
     if (!user) {
       that.create(data, function(err, newuser) {
-        done(null, newuser);
+        return done(null, newuser);
       });
-    } else {
-      done(null, user);
-    }
+    } 
+    done(null, user);
   });
 }
 
-var User = db.model('User', userSchema);
+var chatSchema = new mongoose.Schema({
+  created_at: { type: Date, default: Date.now },
+  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  messages: [messageSchema]
+});
+
+var messageSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  time: { type: Date, default: Date.now },
+  content: String
+});
+
+var Model = {
+  User: db.model('User', userSchema),
+  Chat: db.model('Chat', chatSchema)
+}
 
 // Passport setup
 
@@ -70,12 +146,12 @@ passport.use(new GitHubStrategy({
   function(accessToken, refreshToken, profile, done) {
     process.nextTick(function () {
       var data = {
-        id: profile.id,
+        uid: profile.id,
         name: profile.displayName,
         username: profile.username,
         avatar: profile._json.avatar_url
       }
-      User.findOrCreate(data, done);
+      Model.User.findOrCreate(data, done);
     });
   }
 ));

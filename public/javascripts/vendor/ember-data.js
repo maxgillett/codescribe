@@ -4868,7 +4868,7 @@ DS.Adapter = Ember.Object.extend({
   */
   registerSerializerMappings: function(klass, serializer) {
     var mappings = klass._registeredMappings, superclass, prop;
-
+    console.log(klass);
     if (superclass = klass.superclass) {
       this.registerSerializerMappings(superclass, serializer);
     }
