@@ -17,6 +17,7 @@
     	"passport-github": ">= 0.0.0",
     	"mongodb": ">=1.1.11",
     	"mongoose": "*",
-    	"validator": "*"
+    	"validator": "*",
+    	"underscore": "*"
 	}
 }

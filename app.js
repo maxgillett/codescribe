@@ -15,7 +15,10 @@ var express = require('express')
   , redis = require('redis')
   , RedisStore = require('connect-redis')(express)
   , check = require('validator').check
-  , sanitize = require('validator').sanitize;
+  , sanitize = require('validator').sanitize
+  , _ = require('underscore');
+
+// Mongo db connection instantiated
 
 var db = mongoose.createConnection('localhost', 'test');
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -23,70 +26,67 @@ db.once('open', function () {
   console.log("Mongo db connection established")
 });
 
-var utils = {};
+// Redis and session store setup
 
-utils.verifyAlpha = function(str) {
-  try {
-    check(str).isAlpha();
-  } catch(e) {
-    console.log(e.message);
-    return false
+var redisClient = exports.redisClient = redis.createClient();
+var sessionStore = exports.sessionStore = new RedisStore({client: redisClient});
+
+// 
+
+var utils = {
+  verifyAlpha: function(str) {
+    try {
+      return check(str).isAlpha();
+    } catch(e) {
+      console.log(e.message);
+      // Throw a new error
+    }
+  },
+  sockets: {
+    relayResponse:  function(err, data, type, fn) {
+      utils.verifyAlpha(type);
+      if (err) return "Error";
+      var obj = {
+        success: true,
+        json: {}
+      };
+      obj.json[type] = data;
+      fn(obj);
+    }
   }
 };
+
+// Socket listeners
 
 io.sockets.on('connection', function (socket) {
   console.log("Socket connection established");
 
+  // SOCKETAdapter listeners
+
   socket.on('createRecord', function (type, data, fn) {
-    var type = sanitize(type).ltrim("App."); 
-    utils.verifyAlpha(type); 
-    Model[type].create(data, function(err, chat) {
-      if (err) return "Error";
-      var response = {
-        success: true,
-        json: {
-          chat: chat
-        }
-      }
-      fn(response);
+    Model[type].create(function(err, data) {
+      utils.sockets.relayResponse(err, data, type, fn);
     });
   });
 
   socket.on('findAll', function (type, fn) {
-    var type = sanitize(type).ltrim("App.");
-    utils.verifyAlpha(type);
     Model[type].find({})
-      .populate('participants')
-      .exec(function(err, chats) {
-        console.log(chats);
-        if (err) return "Error";
-        var response = {
-          success: true,
-          json: {
-            chat: chats
-          }
-        }
-        fn(response);
+      .populate('participants') // Should only occur for chats
+      .exec(function(err, data) {
+        utils.sockets.relayResponse(err, data, type, fn);
       });
   });
 
   socket.on('find', function (type, id, fn) {
-    var type = sanitize(type).ltrim("App.");
-    utils.verifyAlpha(type);
     Model[type].findById(id)
-      .populate('participants')
-      .exec(function(err, chat) {
-        console.log(chat);
-        if (err) return "Error";
-        var response = {
-          success: true,
-          json: {
-            chat: chat
-          }
-        }
-        fn(response);
+      .populate('participants') // Should only occur for chats
+      .exec(function(err, data) {
+        utils.sockets.relayResponse(err, data, type, fn);
       });
   });
+
+  // Redis listeners
+
 
 });
 
@@ -115,12 +115,16 @@ var chatSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now },
   participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   messages: [messageSchema]
+}).post('save', function (model, err) {
+    // Create a queue representing this chat in redis after save
 });
 
 var messageSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   time: { type: Date, default: Date.now },
   content: String
+}).pre('save', function (model, err) {
+    // Post model to redis queue before save
 });
 
 var Model = {
@@ -155,11 +159,6 @@ passport.use(new GitHubStrategy({
     });
   }
 ));
-
-// Redis and session store setup
-
-var redisClient = exports.redisClient = redis.createClient();
-var sessionStore = exports.sessionStore = new RedisStore({client: redisClient});
 
 // Create and configure express app
 

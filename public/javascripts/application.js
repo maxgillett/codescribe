@@ -1,3 +1,7 @@
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 // State flag helper function. See https://github.com/ghempton/ember-router-example/blob/master/js/app.js
 
 function stateFlag(name) {
@@ -171,16 +175,22 @@ App = Em.Application.create({
         		route:  '/chats',
         		index: Ember.Route.extend({
         			route: '/',
+              connectOutlets: function(router, context) {
+                router.get('applicationController').connectOutlet('navpane', 'chatpane', App.store.findAll(App.Chat));
+                router.get('applicationController').connectOutlet('content', 'chatroom');
+              }
 	        	}),
         		chat: Ember.Route.extend({
         			route: '/:id',
         			connectOutlets: function(router, chat) {
-        				console.log(chat.id);
-        				router.get('chatroomController').connectOutlet('messages', 'chat', App.store.find(App.Chat, chat.id));
-        			}
-        		}),
-        		create:  Ember.Route.extend({
-        			route: '/new'
+                // This is still kind of buggy. Getting a mapping error in the console. Appears to work however
+                Ember.run.schedule('render', this, function(){
+                  router.get('chatroomController').connectOutlet('messages', 'chat', chat);
+                });
+        			},
+              deserialize: function(router, params) {
+                return App.store.find(App.Chat, params.id);
+              }
         		}),
         		exit: function(router) {
         			// If target state is index, then animate destruction of element
@@ -195,10 +205,10 @@ App = Em.Application.create({
         			var animate = (currentState == "dashboard") ? true : false;
 		        	router.get("applicationController").set("animate", animate);
 		        },
-		        connectOutlets: function(router, context) {
-        			router.get('applicationController').connectOutlet('navpane', 'chatpane', App.store.findAll(App.Chat));
-        			router.get('applicationController').connectOutlet('content', 'chatroom');
-        		},
+            connectOutlets:  function(router, context) {
+              router.get('applicationController').connectOutlet('navpane', 'chatpane', App.store.findAll(App.Chat));
+              router.get('applicationController').connectOutlet('content', 'chatroom');
+            }
         	}),
         	files:  Em.Route.extend({
         		route:  '/files',
@@ -233,8 +243,9 @@ App.SOCKETadapter = DS.Adapter.extend({
 
 	find:  function(store, type, id) {
 		var that = this;
+    var root = this.convertToRoot(type);
 
-    socket.emit('find', type.toString(), id, function(response) {
+    socket.emit('find', root, id, function(response) {
       console.log(response);
       if (response.success) {
         that.didFindRecord(store, type, response.json)
@@ -243,7 +254,7 @@ App.SOCKETadapter = DS.Adapter.extend({
 	},
 
   didFindRecord: function(store, type, json) {
-    var root = type.toString().replace('App.', '').toLowerCase(); // extract this into rootForType function
+    var root = this.convertToRoot(type);
 
     //this.sideload(store, type, json, root);
     store.load(type, json[root]);
@@ -251,8 +262,9 @@ App.SOCKETadapter = DS.Adapter.extend({
 
 	findAll: function(store, type) {
 		var that = this;
+    var root = this.convertToRoot(type);
 
-		socket.emit('findAll', type.toString(), function(response) {
+		socket.emit('findAll', root, function(response) {
 			console.log(response);
 			if (response.success) {
 				that.didFindAll(store, type, response.json)
@@ -261,7 +273,7 @@ App.SOCKETadapter = DS.Adapter.extend({
 	},
 
 	didFindAll: function(store, type, json) {
-		var root = type.toString().replace('App.', '').toLowerCase(); // extract into rootForType function and call pluralize
+		var root = this.convertToRoot(type);
 
 	  //this.sideload(store, type, json, root);
 	  store.loadMany(type, json[root]);
@@ -279,9 +291,10 @@ App.SOCKETadapter = DS.Adapter.extend({
 
 	createRecord:  function(store, type, record) {
 		var that = this;
-	    var data = this.toJSON(record);
+    var data = this.toJSON(record);
+    var root = this.convertToRoot(type);
 
-		socket.emit('createRecord', type.toString(), data, function(response) {
+		socket.emit('createRecord', root, data, function(response) {
 			if (response.success) {
 				that.didCreateRecord(store, type, record, response.json);
 			}
@@ -289,39 +302,39 @@ App.SOCKETadapter = DS.Adapter.extend({
 	},
 
 	didCreateRecord: function(store, type, record, json) {
-		var root = type.toString().replace('App.', '').toLowerCase();
+		var root = this.convertToRoot(type);
 
     	//this.sideload(store, type, data, root);
     	store.didSaveRecord(record, json[root]);
   	},
 
-  	sideload: function(store, type, json, root) {
-	    var sideloadedType, mappings, loaded = {};
+  sideload: function(store, type, json, root) {
+    var sideloadedType, mappings, loaded = {};
 
-	    loaded[root] = true;
+    loaded[root] = true;
 
-	    for (var prop in json) {
-			if (!json.hasOwnProperty(prop)) { continue; }
-			if (prop === root) { continue; }
-			if (prop === get(this, 'meta')) { continue; }
+    for (var prop in json) {
+		if (!json.hasOwnProperty(prop)) { continue; }
+		if (prop === root) { continue; }
+		if (prop === get(this, 'meta')) { continue; }
 
-			sideloadedType = type.typeForAssociation(prop);
+		sideloadedType = type.typeForAssociation(prop);
 
-			if (!sideloadedType) {
-				mappings = get(this, 'mappings');
-				Ember.assert("Your server returned a hash with the key " + prop + " but you have no mappings", !!mappings);
+		if (!sideloadedType) {
+			mappings = get(this, 'mappings');
+			Ember.assert("Your server returned a hash with the key " + prop + " but you have no mappings", !!mappings);
 
-				sideloadedType = get(mappings, prop);
+			sideloadedType = get(mappings, prop);
 
-				if (typeof sideloadedType === 'string') {
-				  sideloadedType = get(window, sideloadedType);
-				}
+			if (typeof sideloadedType === 'string') {
+			  sideloadedType = get(window, sideloadedType);
+			}
 
-	        	Ember.assert("Your server returned a hash with the key " + prop + " but you have no mapping for it", !!sideloadedType);
-	    	}
+        	Ember.assert("Your server returned a hash with the key " + prop + " but you have no mapping for it", !!sideloadedType);
+    	}
 
-	    	this.sideloadAssociations(store, sideloadedType, json, prop, loaded);
-	    }
+    	this.sideloadAssociations(store, sideloadedType, json, prop, loaded);
+    }
 	},
 
 	sideloadAssociations: function(store, type, json, prop, loaded) {
@@ -359,6 +372,12 @@ App.SOCKETadapter = DS.Adapter.extend({
 			}
 		})
 	},
+
+  convertToRoot:  function(type) {
+    var root =  type.toString().replace('App.', '').toLowerCase().capitalize();
+    console.log(root);
+    return root;
+  }
 
 
 });
@@ -464,3 +483,5 @@ App.store.loadMany(App.Chat, [{ _id: 1,
 							 }]);
 
 App.initialize();
+
+

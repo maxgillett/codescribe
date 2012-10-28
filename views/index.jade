@@ -1,7 +1,7 @@
 doctype strict 5
 html
 	head
-		title CodeScribe
+		title Codescribe
 		link(rel='stylesheet', href='./stylesheets/codescribe.css')
 		link(rel='stylesheet', href='./javascripts/vendor/codemirror/lib/codemirror.css')
 		script(src='./javascripts/vendor/jquery-1.8.2.min.js')
@@ -21,19 +21,19 @@ html
 				#navigation
 					|	<div id="dashboard" {{action goToDashboard}} {{bindAttr class="isChats:no-border-bottom isDashboard:active isDashboard:no-border-top"}}>
 					| 		<div class="text">
-					|			<div class="dash-img" {{bindAttr class="isDashboard:white"}}></div>
+					|			<div {{bindAttr class="isDashboard:white :dash-img"}}></div>
 					|			<span>Dashboard</span>
 					|		</div>
 					|	</div>
 					|	<div id="chats" {{action goToChats}} {{bindAttr class="isChats:active isFiles:no-border-bottom"}}>
 					| 		<div class="text">
-					|			<div class="chats-img" {{bindAttr class="isChats:white"}}></div>
+					|			<div {{bindAttr class="isChats:white :chats-img"}}></div>
 					|			<span>Chats</span>
 					|		</div>
 					|	</div>
 					|	<div id="files" {{action goToFiles}} {{bindAttr class="isFiles:active"}} >
 					| 		<div class="text">
-					|			<div class="files-img" {{bindAttr class="isFiles:white"}}></div>
+					|			<div {{bindAttr class="isFiles:white :files-img"}}></div>
 					|			<span>Files</span>
 					|		</div>
 					|	</div>
