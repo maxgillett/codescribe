@@ -69,18 +69,27 @@ App = Em.Application.create({
         	}
     	}
   	}),
-  	ChatroomController:  Em.Controller.extend({
-
-  	}),
-  	ChatroomView:  Em.View.extend({
-  		templateName:  'chatroom'
-  	}),
   	ChatController:  Em.Controller.extend({
-
+      post: function() {
+        var messages = this.content.get("messages");
+        var newMessage = App.store.createRecord(App.Message, {
+           msg: this.message,
+           time: Date.now(),
+           user: "508730e72276050000000002"
+        })
+        messages.pushObject(newMessage);
+        App.store.commit();
+      }
   	}),
   	ChatView:  Em.View.extend({
   		templateName:  'chat'
   	}),
+    MessagesView:  Em.View.extend({
+      didInsertElement:  function() {
+        var height = $("#message_window")[0].scrollHeight;
+        $('#message_window').scrollTop(height);
+      }
+    }),
   	DashboardController:  Em.Controller.extend({
   	}),
   	DashboardView:  Em.View.extend({
@@ -132,6 +141,17 @@ App = Em.Application.create({
   	FileInspectorView:  Em.View.extend({
   		templateName:  'fileinspector'
   	}),
+    MessageTextareaView: Em.TextArea.extend({
+      // Should binding be delayed and only update when user clicks enter?
+      // Doing it this way should allow the state of value to be kept when switching between chats
+      keyDown: function(e) {
+        if (e.which == 13) {
+          e.preventDefault();
+          App.router.get("chatController").post();
+          $("#response").val('');
+        }
+      }
+    }),
   	Router: Ember.Router.extend({
   		//location: 'history',
   		enableLogging: true,
@@ -177,16 +197,18 @@ App = Em.Application.create({
         			route: '/',
               connectOutlets: function(router, context) {
                 router.get('applicationController').connectOutlet('navpane', 'chatpane', App.store.findAll(App.Chat));
-                router.get('applicationController').connectOutlet('content', 'chatroom');
+              
+                // Check if a state property is set and transition to appropriate chat (i.e. transitionTo "chat" with a certain context)
               }
 	        	}),
         		chat: Ember.Route.extend({
         			route: '/:id',
         			connectOutlets: function(router, chat) {
                 // This is still kind of buggy. Getting a mapping error in the console. Appears to work however
-                Ember.run.schedule('render', this, function(){
-                  router.get('chatroomController').connectOutlet('messages', 'chat', chat);
-                });
+                Ember.run.later(function() {
+                  console.log(chat);
+                  router.get('applicationController').connectOutlet('content', 'chat', chat);
+                }, 150);
         			},
               deserialize: function(router, params) {
                 return App.store.find(App.Chat, params.id);
@@ -207,7 +229,7 @@ App = Em.Application.create({
 		        },
             connectOutlets:  function(router, context) {
               router.get('applicationController').connectOutlet('navpane', 'chatpane', App.store.findAll(App.Chat));
-              router.get('applicationController').connectOutlet('content', 'chatroom');
+              //router.get('applicationController').connectOutlet('content', 'chat');
             }
         	}),
         	files:  Em.Route.extend({
@@ -239,7 +261,41 @@ var socket = io.connect('http://localhost:3000');
 
 // Sockets adapter
 
+(function() {
+var get = Ember.get;
+
+DS.SOCKETserializer = DS.Serializer.extend({
+  keyForBelongsTo: function(type, name) {
+    return this.keyForAttributeName(type, name) + "_id";
+  },
+
+  keyForAttributeName: function(type, name) {
+    return Ember.String.decamelize(name);
+  },
+
+  addBelongsTo: function(hash, record, key, relationship) {
+    var hashKey = this._keyForBelongsTo(record.constructor, key),
+        id = get(record, key+'.id');
+
+    if (!Ember.none(id)) { hash[hashKey] = id; }
+  },
+
+  addHasMany: function(hash, record, key, relationship) {
+    console.log("testttt");
+    var hashKey = this._keyForHasMany(record.constructor, key),
+        id = get(record, key+'.id');
+
+    if (!Ember.none(id)) { hash[hashKey] = id; }
+  }
+});
+
+})();
+
+
+
 App.SOCKETadapter = DS.Adapter.extend({
+
+  serializer: DS.SOCKETserializer.create(),
 
 	find:  function(store, type, id) {
 		var that = this;
@@ -265,7 +321,6 @@ App.SOCKETadapter = DS.Adapter.extend({
     var root = this.convertToRoot(type);
 
 		socket.emit('findAll', root, function(response) {
-			console.log(response);
 			if (response.success) {
 				that.didFindAll(store, type, response.json)
 			}
@@ -291,8 +346,9 @@ App.SOCKETadapter = DS.Adapter.extend({
 
 	createRecord:  function(store, type, record) {
 		var that = this;
-    var data = this.toJSON(record);
+    var data = this.toJSON(record, {associations: true});
     var root = this.convertToRoot(type);
+    console.log(data);
 
 		socket.emit('createRecord', root, data, function(response) {
 			if (response.success) {
@@ -305,6 +361,14 @@ App.SOCKETadapter = DS.Adapter.extend({
 		var root = this.convertToRoot(type);
 
     	//this.sideload(store, type, data, root);
+
+      // Updates in-flight status of the parent object 
+      record.eachAssociation(function(name, meta) {
+          if (meta.kind === 'belongsTo') {
+            store.didUpdateRelationship(record, name);
+          }
+        });
+
     	store.didSaveRecord(record, json[root]);
   	},
 
@@ -361,21 +425,29 @@ App.SOCKETadapter = DS.Adapter.extend({
 		}
 	},
 
-	updateRecord:  function(store, type, model) {
+	updateRecord:  function(store, type, record) {
 		var that = this;
-		var url = type.url;
+    var data = this.toJSON(record, {associations: true});
+		var root = this.convertToRoot(type);
+    console.log(data);
 
-		socket.emit('updateRecord', url, data, function(response) {
+		socket.emit('updateRecord', root, data, function(response) {
 			// On success...
 			if (response.success) {
-				that.didUpdateRecord(model, response.data)
+				that.didUpdateRecord(store, type, record, response.data)
 			}
 		})
 	},
 
+  didUpdateRecord: function(store, type, record, json) {
+    var root = this.convertToRoot(type);
+
+    //this.sideload(store, type, json, root);
+    store.didSaveRecord(record, json && json[root]);
+  },
+
   convertToRoot:  function(type) {
     var root =  type.toString().replace('App.', '').toLowerCase().capitalize();
-    console.log(root);
     return root;
   }
 
@@ -386,16 +458,18 @@ App.SOCKETadapter = DS.Adapter.extend({
 // Mapping
 
 App.SOCKETadapter.map("App.Chat", { primaryKey: "_id" });
+App.SOCKETadapter.map("App.Message", { primaryKey: "_id" });
 
 
 // Store
 
 App.store = DS.Store.create({
-	revision: 6,
+	revision: 7,
 	adapter: App.SOCKETadapter.create({
 		mappings: {
      		 // all your models will have to have a mapping defined like this
-      		chat: 'App.Chat'
+      		chat: 'App.Chat',
+          message: 'App.Message'
     	}
 	})
 });
@@ -404,84 +478,40 @@ App.store = DS.Store.create({
 // Models
 
 App.Message = DS.Model.extend({
-	name: DS.attr('string'),
+  primaryKey: '_id',
+	user: DS.attr('string'),
 	msg: DS.attr('string'),
 	time: DS.attr('string'),
-	chat: DS.belongsTo('App.Chat')
-});
+	chat: DS.belongsTo('App.Chat'),
 
-App.Message.reopenClass({
-    url: '/message/%@'
+  human_time: function() {
+    var date = moment(this.get("time"));
+    return date.format("h:mm a");
+  }.property('time'),
+
+  name: function() {
+    return this.get("chat").get("participants").get("firstObject").name;
+    //return "Max Gillett";
+  }.property('chat')
 });
 
 App.Chat = DS.Model.extend({
 	primaryKey: '_id',
-    name: DS.attr('string'),
-    created_at: DS.attr('string'),
-    avatar: DS.attr('string'),
-    participants: DS.attr('string'),
-	messages: DS.hasMany('App.Message', {embedded: true,}),
+  name: DS.attr('string'),
+  created_at: DS.attr('string'),
+  avatar: DS.attr('string'),
+  participants: DS.attr('string'),
+	messages: DS.hasMany('App.Message', {embedded: true}),
+
 	preview: function() {
 		try {
-			return this.get('messages').get("firstObject").get("msg") 
+			return this.get('messages').get("lastObject").get("msg") 
 		} catch(e) {
 			return "No messages yet"
 		}
-	}.property('messages')
+	}.property('messages.lastObject')
 });
 
-// Define the mappings
-
-
-// Bootstrapping some data for testing purposes
-
-App.store.loadMany(App.Chat, [{ _id: 1,
-								participants: [{
-									name: 'John Doe'
-								}],
-								messages: [
-									{
-									id: 1,
-									name: 'John Doe',
-									msg: 'This is a test post one two three. This is a te two three. This is a test post one two three. This is a test post one two three',
-									time: '1:10pm'
-									},{
-									id: 2,
-									name: 'John Doe',
-									msg: ' This is another test post sicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis no three two one',
-									time: '1:15pm'
-									},{
-									id: 4,
-									name: 'John Doe',
-									msg: 'This is a test post one two three. This is a te two three. This is a test post one two three. This is a test post one two three',
-									time: '1:10pm'
-									},{
-									id: 5,
-									name: 'John Doe',
-									msg: ' This is another test post sicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis no three two one',
-									time: '1:35pm'
-									}
-								]
-							 },
-							 {  _id: 2,
-								participants: [{
-									name: 'Jane Doe'
-								}],
-								messages: [
-									{
-									id: 6,
-									name: 'Jane Doe',
-									msg: 'This is a test post one two three. This is a test post one two three. This is a test post one two three. This is a test post one two three. This is a test post one two three',
-									time: '1:10pm'
-									},{
-									id: 7,
-									name: 'Jane Doe',
-									msg: ' This is another test post three two one',
-									time: '1:15pm'
-									}
-								]
-							 }]);
 
 App.initialize();
-
 

@@ -44,7 +44,6 @@ var utils = {
   },
   sockets: {
     relayResponse:  function(err, data, type, fn) {
-      utils.verifyAlpha(type);
       if (err) return "Error";
       var obj = {
         success: true,
@@ -64,13 +63,28 @@ io.sockets.on('connection', function (socket) {
   // SOCKETAdapter listeners
 
   socket.on('createRecord', function (type, data, fn) {
-    Model[type].create(function(err, data) {
+    Model[type].create(data, function(err, data) {
+      var execute = {
+        Chat: function() {
+          // Create logic specific to chats
+        },
+        Message: function() {
+          // Add reference to chat model
+          Model["Chat"].findById(data.chat_id)
+            .exec(function(err, chat) {
+              chat.messages.push(data._id);
+              chat.save();
+            });
+        }
+      };
+      execute[type]();
       utils.sockets.relayResponse(err, data, type, fn);
     });
   });
 
   socket.on('findAll', function (type, fn) {
     Model[type].find({})
+      .populate('messages')
       .populate('participants') // Should only occur for chats
       .exec(function(err, data) {
         utils.sockets.relayResponse(err, data, type, fn);
@@ -79,8 +93,10 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('find', function (type, id, fn) {
     Model[type].findById(id)
-      .populate('participants') // Should only occur for chats
+      .populate("messages") 
+      .populate('participants')
       .exec(function(err, data) {
+        console.log(data);
         utils.sockets.relayResponse(err, data, type, fn);
       });
   });
@@ -114,7 +130,7 @@ userSchema.statics.findOrCreate = function(data, done) {
 var chatSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now },
   participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  messages: [messageSchema]
+  messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }]
 }).post('save', function (model, err) {
     // Create a queue representing this chat in redis after save
 });
@@ -122,14 +138,18 @@ var chatSchema = new mongoose.Schema({
 var messageSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   time: { type: Date, default: Date.now },
-  content: String
-}).pre('save', function (model, err) {
-    // Post model to redis queue before save
+  msg: String,
+  chat_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat' },
 });
+
+// .pre('save', function (model, err) {
+//     // Post model to redis queue before save
+// });
 
 var Model = {
   User: db.model('User', userSchema),
-  Chat: db.model('Chat', chatSchema)
+  Chat: db.model('Chat', chatSchema),
+  Message: db.model('Message', messageSchema)
 }
 
 // Passport setup

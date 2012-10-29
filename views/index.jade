@@ -7,6 +7,7 @@ html
 		script(src='./javascripts/vendor/jquery-1.8.2.min.js')
 		script(src='./socket.io/socket.io.js')
 		script(src='./javascripts/vendor/handlebars-1.0.rc.1.js')
+		script(src='./javascripts/vendor/moment.min.js')
 		script(src='./javascripts/vendor/ember.js')
 		script(src='./javascripts/vendor/ember-data.js')
 		script(src='./javascripts/vendor/codemirror/lib/codemirror.js')
@@ -118,81 +119,31 @@ html
 						div Favorites
 				#chat_container
 					
-		script(type='text/x-handlebars', 'data-template-name'='chat').
-			{{#each message in content.messages}}
-				{{#with message}}
-					<div id="message">
-						<div class="image"><img class="profile-img" src="images/avatar@2x.png"></div>
-						<div class="text">
-							<div class="user">
-								<span class="name">{{ name }}</span>
-								<span class="time"> - {{ time }}</span>
+		script(type='text/x-handlebars', 'data-template-name'='chat')
+			#message_window.
+				{{#each m in content.messages}}
+					{{#with m}}
+						{{#view App.MessagesView }}
+							<div id="message">
+								<div class="image"><img class="profile-img" src="images/avatar@2x.png"></div>
+								<div class="text">
+									<div class="user">
+										<span class="name">{{ name }}</span>
+										<span class="time"> - {{ human_time }}</span>
+									</div>
+									<div class="msg">
+										<span>{{ msg }}</span>
+									</div>
+								</div>
+								<div class="clearfix"></div>
 							</div>
-							<div class="msg">
-								<span>{{msg}}</span>
-							</div>
-						</div>
-						<div class="clearfix"></div>
-					</div>
-					<div id="divider"></div>
-				{{/with}}
-			{{/each}}
+							<div id="divider"></div>
+						{{/view}}
+					{{/with}}
+				{{/each}}
 
+			{{view App.MessageTextareaView id="response" placeholder="Send a message" valueBinding="message"}}
 
-		script(type='text/x-handlebars', 'data-template-name'='chatroom')
-			#message_window
-				{{ outlet messages }}
-				#message
-					.image
-						img(class='profile-img', src='images/avatar@2x.png')
-					.text
-						.user 
-							span.name Max Gillett
-							span.time  - 11:08am
-						.msg
-							span Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-					.clearfix
-				#divider
-				#message
-					.image
-						img(class='profile-img', src='images/avatar@2x.png')
-					.text
-						.user
-							span.name Elon Musk
-							span.time  - 12:14pm
-						.msg
-							span ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m
-						.msg
-							pre.code.cm-s-default
-								| app.configure(function() {
-								|  function compile(str, path) {
-								|   return stylus(str)
-								|      .use(nib())
-								|      .import('nib')
-								|      .import(__dirname + '/server/views/reset');
-								|  }
-								|  this.use(stylus.middleware({
-								|    src: __dirname + "/server/views",
-								|    compile: compile,
-								|    force: true
-								|  }));
-								|  this.use(express.static(__dirname+'/server/views'));
-								| });
-						.msg
-							span ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m
-				#divider
-				#message
-					.image
-						img(class='profile-img', src='images/avatar@2x.png')
-					.text
-						.user
-							span.name Elon Musk
-							span.time  - 1:04pm
-						.msg
-							span ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad m
-
-
-			textarea#response(placeholder="Send a message")
 
 		script(src='./javascripts/application.js')
 		script(type='text/javascript')	
