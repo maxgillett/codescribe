@@ -29,7 +29,12 @@ App = Em.Application.create({
     	templateName: 'application'
   	}),
   	ChatpaneController:  Em.ArrayController.extend({
-  		hideView: false
+      activeLength: function() {
+        return this.filterProperty('active').length
+      }.property('length'),
+      inactiveLength: function() {
+        return this.filterProperty('active', false).length
+      }.property('length')
    	}),
   	ChatpaneView:  Em.View.extend({
   		templateName:  'chatpane',
@@ -58,36 +63,94 @@ App = Em.Application.create({
 	    		var that = this;
 	    		var clone = this.$("#nav_pane").clone();
 	    		this.$().replaceWith(clone);
-	  			$("#content").animate({
-				    left: ["-=275", 'swing'],
-				},{ duration: 200, queue: false });
-	        	clone.css({'z-index':'-5'}).animate({
-				    left: ["-=275", 'swing']
-				},{ duration: 200, queue: false, complete: function() {
-					clone.remove();
-				}});
-        	}
+	  			$("#content")
+            .animate({
+				      left: ["-=275", 'swing']
+				    },{ 
+              duration: 200, queue: false });
+              clone.css({'z-index':'-5'}).animate({
+				      left: ["-=275", 'swing']
+				    },{
+              duration: 200,
+              queue: false,
+              complete: function() {
+                clone.remove();
+				      }
+            });
+        }
     	}
   	}),
   	ChatController:  Em.Controller.extend({
-      post: function() {
+      // post a message
+      postMessage: function() {
         var messages = this.content.get("messages");
         var newMessage = App.store.createRecord(App.Message, {
-           msg: this.message,
-           time: Date.now(),
-           user: "508730e72276050000000002"
+           msg: this.message
         })
         messages.pushObject(newMessage);
         App.store.commit();
+      },
+      activeChat: function(request) { 
+        var that = this;
+
+        // Update the chat's active status
+        this.content.set('active', request);
+        
+        // Let observes know that content has changed
+        App.get("router").get("chatpaneController").enumerableContentDidChange()
+
+        // Tell the serve to subscribe/unsubscribe to/from this chat
+        if (request) {
+          socket.emit('subscribe', {id: this.content.id}, function(channel) {
+            socket.on(channel, function(json) {
+              var obj = JSON.parse(json);
+
+              ////// * Some testing
+              // var newMessage = App.store.createRecord(App.Message, {id: json._id});
+              // newMessage.adapterDidCommit();
+              // App.store.load(App.Message, json);
+              //App.store.load(App.Message, obj);
+              //var newMessage = App.Message.find(obj._id);
+
+              App.store.load(App.Message, obj);
+              var newMessage = App.Message.find(obj._id);
+              newMessage.dataDidChange();
+
+              //var messages = that.content.get("messages");
+              //messages.pushObject(newMessage);
+            })
+          });
+        } else {
+          socket.emit('unsubscribe', {id: this.content.id});
+        }
       }
   	}),
   	ChatView:  Em.View.extend({
-  		templateName:  'chat'
+  		templateName:  'chat',
+      joinchat: function() { 
+        this.get("controller").activeChat(true);
+      },
+      leavechat: function() { 
+        this.get("controller").activeChat(false);        
+      },
   	}),
     MessagesView:  Em.View.extend({
       didInsertElement:  function() {
         var height = $("#message_window")[0].scrollHeight;
         $('#message_window').scrollTop(height);
+
+        var msg = this.$('.text .msg span');
+        var raw = msg.text();
+        if (raw.indexOf("<code>") != -1) {
+          var sanitized = raw.replace(/<code>/, ''); // Fix this regexp  
+          this.$('.text .msg').html('<pre class="code cm-s-default"></pre>');
+          CodeMirror.runMode(sanitized, {name: "javascript", json: true}, this.$('.text .msg pre').get(0));
+        }
+      }
+    }),
+    SingleChatView:  Em.View.extend({
+      classNames: ["chat", "ellipsis"],
+      didInsertElement:  function() {
       }
     }),
   	DashboardController:  Em.Controller.extend({
@@ -147,7 +210,7 @@ App = Em.Application.create({
       keyDown: function(e) {
         if (e.which == 13) {
           e.preventDefault();
-          App.router.get("chatController").post();
+          App.router.get("chatController").postMessage();
           $("#response").val('');
         }
       }
@@ -196,7 +259,8 @@ App = Em.Application.create({
         		index: Ember.Route.extend({
         			route: '/',
               connectOutlets: function(router, context) {
-                router.get('applicationController').connectOutlet('navpane', 'chatpane', App.store.findAll(App.Chat));
+                var allChats = App.store.findAll(App.Chat);
+                router.get('applicationController').connectOutlet('navpane', 'chatpane', allChats);
               
                 // Check if a state property is set and transition to appropriate chat (i.e. transitionTo "chat" with a certain context)
               }
@@ -204,9 +268,10 @@ App = Em.Application.create({
         		chat: Ember.Route.extend({
         			route: '/:id',
         			connectOutlets: function(router, chat) {
-                // This is still kind of buggy. Getting a mapping error in the console. Appears to work however
+                // What is the proper way to do this? Using a run loop?
                 Ember.run.later(function() {
-                  console.log(chat);
+                  // Fetch the unloaded messages
+                  //chat.get("messages").fetch();
                   router.get('applicationController').connectOutlet('content', 'chat', chat);
                 }, 150);
         			},
@@ -259,7 +324,12 @@ App = Em.Application.create({
 
 var socket = io.connect('http://localhost:3000');
 
-// Sockets adapter
+socket.on('connect', function () {
+  socket.on('')
+});
+
+
+// Sockets serializer
 
 (function() {
 var get = Ember.get;
@@ -280,13 +350,13 @@ DS.SOCKETserializer = DS.Serializer.extend({
     if (!Ember.none(id)) { hash[hashKey] = id; }
   },
 
-  addHasMany: function(hash, record, key, relationship) {
-    console.log("testttt");
-    var hashKey = this._keyForHasMany(record.constructor, key),
-        id = get(record, key+'.id');
+  // addHasMany: function(hash, record, key, relationship) {
+  //   console.log("testttt");
+  //   var hashKey = this._keyForHasMany(record.constructor, key),
+  //       id = get(record, key+'.id');
 
-    if (!Ember.none(id)) { hash[hashKey] = id; }
-  }
+  //   if (!Ember.none(id)) { hash[hashKey] = id; }
+  // }
 });
 
 })();
@@ -302,7 +372,6 @@ App.SOCKETadapter = DS.Adapter.extend({
     var root = this.convertToRoot(type);
 
     socket.emit('find', root, id, function(response) {
-      console.log(response);
       if (response.success) {
         that.didFindRecord(store, type, response.json)
       }
@@ -336,10 +405,6 @@ App.SOCKETadapter = DS.Adapter.extend({
 	  store.didUpdateAll(type);
 	},
 
-	findMany:  function(store, type, ids) {
-		// Implement this function
-	},
-
 	findQuery:  function(store, type, query, modelArray) {
 		// Implement this function
 	},
@@ -349,6 +414,7 @@ App.SOCKETadapter = DS.Adapter.extend({
     var data = this.toJSON(record, {associations: true});
     var root = this.convertToRoot(type);
     console.log(data);
+
 
 		socket.emit('createRecord', root, data, function(response) {
 			if (response.success) {
@@ -360,6 +426,7 @@ App.SOCKETadapter = DS.Adapter.extend({
 	didCreateRecord: function(store, type, record, json) {
 		var root = this.convertToRoot(type);
 
+    debugger;
     	//this.sideload(store, type, data, root);
 
       // Updates in-flight status of the parent object 
@@ -429,7 +496,6 @@ App.SOCKETadapter = DS.Adapter.extend({
 		var that = this;
     var data = this.toJSON(record, {associations: true});
 		var root = this.convertToRoot(type);
-    console.log(data);
 
 		socket.emit('updateRecord', root, data, function(response) {
 			// On success...
@@ -478,7 +544,6 @@ App.store = DS.Store.create({
 // Models
 
 App.Message = DS.Model.extend({
-  primaryKey: '_id',
 	user: DS.attr('string'),
 	msg: DS.attr('string'),
 	time: DS.attr('string'),
@@ -490,18 +555,26 @@ App.Message = DS.Model.extend({
   }.property('time'),
 
   name: function() {
-    return this.get("chat").get("participants").get("firstObject").name;
-    //return "Max Gillett";
+    //return this.get("chat").get("participants").get("firstObject").name;
+    return "Max Gillett";
   }.property('chat')
 });
 
 App.Chat = DS.Model.extend({
-	primaryKey: '_id',
+  active: false,
   name: DS.attr('string'),
   created_at: DS.attr('string'),
   avatar: DS.attr('string'),
   participants: DS.attr('string'),
-	messages: DS.hasMany('App.Message', {embedded: true}),
+	messages: DS.hasMany('App.Message'),
+
+  time: function() {
+    try {
+      return this.get('messages').get('lastObject').get("human_time")
+    } catch(e) {
+
+    }
+  }.property('messages.lastObject.human_time'),
 
 	preview: function() {
 		try {
@@ -509,9 +582,16 @@ App.Chat = DS.Model.extend({
 		} catch(e) {
 			return "No messages yet"
 		}
-	}.property('messages.lastObject')
+	}.property('messages.lastObject.msg')
 });
 
 
 App.initialize();
 
+// var message = App.store.load(App.Message, { msg: 'ffffinally?',
+//   chat_id: "508f3a481b82b41c8b00001b",
+//   user: "508730e72276050000000002",
+//   _id: "509099b921d54eeebds00000111111",
+//   time: "Tue Oct 30 2012 22:23:37 GMT-0500 (CDT)" });
+
+//console.log(message);

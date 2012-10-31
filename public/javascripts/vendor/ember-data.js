@@ -340,6 +340,15 @@ DS.ManyArray = DS.RecordArray.extend({
     store.fetchUnloadedClientIds(type, clientIds);
   },
 
+  // // Method to fetch only a single object
+  // fetchOne: function() {
+  //   var clientId = get(this, 'content')[0],
+  //       store = get(this, 'store'),
+  //       type = get(this, 'type');
+
+  //   store.fetchUnloadedClientIds(type, clientId);
+  // },
+
   // Overrides Ember.Array's replace method to implement
   replaceContent: function(index, removed, added) {
     // Map the array of record objects into an array of  client ids.
@@ -2344,7 +2353,7 @@ DS.Store = Ember.Object.extend({
       var adapter = get(this, '_adapter');
       id = adapter.extractId(type, hash);
     }
-
+    
     id = coerceId(id);
 
     var typeMap = this.typeMapFor(type),
@@ -2354,6 +2363,7 @@ DS.Store = Ember.Object.extend({
     if (clientId !== undefined) {
       cidToHash[clientId] = hash;
 
+
       var record = this.recordCache[clientId];
       if (record) {
         record.loadedData();
@@ -2361,9 +2371,9 @@ DS.Store = Ember.Object.extend({
     } else {
       clientId = this.pushHash(hash, id, type);
     }
-
+    
     this.updateRecordArrays(type, clientId);
-
+    
     return { id: id, clientId: clientId };
   },
 
@@ -3796,8 +3806,7 @@ var hasAssociation = function(type, options, one) {
       type = get(this, type, false) || get(window, type);
     }
 
-    //id = data[key];
-    id = options.embedded ? store.load(type, data[key]).id : data[key];
+    id = data[key];
     return id ? store.find(type, id) : null;
   }).property('data').meta(meta);
 };
@@ -3865,8 +3874,7 @@ var hasAssociation = function(type, options) {
       type = get(this, type, false) || get(window, type);
     }
 
-    //ids = data[key];
-    ids = options.embedded ? store.loadMany(type, data[key]).ids : data[key];
+    ids = data[key];
     association = store.findMany(type, ids || [], this, meta);
     set(association, 'owner', this);
     set(association, 'name', key);
@@ -4747,6 +4755,7 @@ DS.Serializer = Ember.Object.extend({
     // IDs remain consistent between application runs; especially
     // if the ID is serialized and later deserialized from the URL,
     // when type information will have been lost.
+    console.log(hash[primaryKey]+'');
     return hash[primaryKey]+'';
   },
 

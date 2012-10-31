@@ -16,7 +16,9 @@ var express = require('express')
   , RedisStore = require('connect-redis')(express)
   , check = require('validator').check
   , sanitize = require('validator').sanitize
-  , _ = require('underscore');
+  , _ = require('underscore')
+  , sioCookieParser = express.cookieParser("secretstring");
+
 
 // Mongo db connection instantiated
 
@@ -28,8 +30,9 @@ db.once('open', function () {
 
 // Redis and session store setup
 
-var redisClient = exports.redisClient = redis.createClient();
-var sessionStore = exports.sessionStore = new RedisStore({client: redisClient});
+var redisClient = exports.redisClient = redis.createClient(),
+    redisSubClient = exports.redisSubClient = redis.createClient(),
+    sessionStore = exports.sessionStore = new RedisStore({client: redisClient});
 
 // 
 
@@ -58,15 +61,34 @@ var utils = {
 // Socket listeners
 
 io.sockets.on('connection', function (socket) {
+
+  // Set current user id
+
+  sioCookieParser(socket.handshake, {}, function(err) {
+    sessionStore.get(socket.handshake.signedCookies['codescribe'], function(err, data) {
+      socket.set('uid', data.passport.user, function() {});
+    });
+  });
+
   console.log("Socket connection established");
 
   // SOCKETAdapter listeners
 
   socket.on('createRecord', function (type, data, fn) {
+    // Modify data if it is a message
+    if (type == "Message") {
+      socket.get('uid', function(err, uid) {
+        data.user = uid;
+      });
+    }
     Model[type].create(data, function(err, data) {
       var execute = {
         Chat: function() {
-          // Create logic specific to chats
+          Model["Chat"].findById(data._id)
+            .populate('participants')
+            .exec(function(err, chat) {
+              utils.sockets.relayResponse(err, chat, type, fn);
+            });
         },
         Message: function() {
           // Add reference to chat model
@@ -75,17 +97,16 @@ io.sockets.on('connection', function (socket) {
               chat.messages.push(data._id);
               chat.save();
             });
+          utils.sockets.relayResponse(err, data, type, fn);
         }
       };
       execute[type]();
-      utils.sockets.relayResponse(err, data, type, fn);
     });
   });
 
   socket.on('findAll', function (type, fn) {
     Model[type].find({})
-      .populate('messages')
-      .populate('participants') // Should only occur for chats
+      .populate('participants')
       .exec(function(err, data) {
         utils.sockets.relayResponse(err, data, type, fn);
       });
@@ -93,7 +114,6 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('find', function (type, id, fn) {
     Model[type].findById(id)
-      .populate("messages") 
       .populate('participants')
       .exec(function(err, data) {
         console.log(data);
@@ -101,8 +121,17 @@ io.sockets.on('connection', function (socket) {
       });
   });
 
-  // Redis listeners
+  // Message listeners
 
+  socket.on('subscribe', function(data, fn) {
+    redisSubClient.subscribe(data.id);
+    redisSubClient.on('message', function(channel, json) {
+      socket.emit(channel, json)
+      // console.log("channel" + channel);
+      // console.log("message" + json);
+    });
+    fn(data.id); // subscribe to the channel locally
+  })
 
 });
 
@@ -140,11 +169,12 @@ var messageSchema = new mongoose.Schema({
   time: { type: Date, default: Date.now },
   msg: String,
   chat_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat' },
+}).pre('save', function (next) {
+  // Post model to redis queue before save
+  var json = JSON.stringify(this)
+  redisClient.publish(this.chat_id, json);
+  next();
 });
-
-// .pre('save', function (model, err) {
-//     // Post model to redis queue before save
-// });
 
 var Model = {
   User: db.model('User', userSchema),
@@ -155,7 +185,7 @@ var Model = {
 // Passport setup
 
 passport.serializeUser(function(user, done) {
-  done(null, user.id);
+  done(null, user._id);
 });
 
 passport.deserializeUser(function(obj, done) {

@@ -86,21 +86,47 @@
           </div>
         </div>
         <div id="chat_container">
-          <h2> <span>Today</span><span>{{controller.length}} chats</span></h2>
+          <h2> <span>Active</span><span>{{controller.activeLength}} chats</span></h2>
           <div id="group">
             {{#each chat in controller}}
              {{#with chat}}
-              <div class="chat ellipsis" {{ action showChat this }}>
-               <span class="members">
-                {{#each member in participants}}
-                 {{#with member}}
-                  {{name}}
-                 {{/with}}
-                {{/each}}	
-               </span>
-               <span class="time">{{time}}</span>
-               <span class="text">{{preview}}</span>
-              </div>
+              {{#if active}}
+               <div class="chat-container" {{ action showChat this }}>
+                {{#view App.SingleChatView  }}
+                 <span class="members">
+                  {{#each member in participants}}
+                   {{#with member}}
+                    {{name}}
+                   {{/with}}
+                  {{/each}}	
+                 </span>
+                 <span class="time">{{time}}</span>
+                 <span class="text">{{preview}}</span>
+                {{/view}}
+               </div>
+              {{/if}}
+             {{/with}}
+            {{/each}}
+          </div>
+          <h2> <span>Today</span><span>{{controller.inactiveLength}} chats</span></h2>
+          <div id="group">
+            {{#each chat in controller}}
+             {{#with chat}}
+              {{#unless active}}
+               <div class="chat-container" {{ action showChat this }}>
+                {{#view App.SingleChatView  }}
+                 <span class="members">
+                  {{#each member in participants}}
+                   {{#with member}}
+                    {{name}}
+                   {{/with}}
+                  {{/each}}	
+                 </span>
+                 <span class="time">{{time}}</span>
+                 <span class="text">{{preview}}</span>
+                {{/view}}
+               </div>
+              {{/unless}}
              {{/with}}
             {{/each}}
             
@@ -113,7 +139,7 @@
       <div id="nav_pane" class="filelist">
         <div id="fixed_header">	
           <div class="mag_icon"></div>
-          <input id="search" value="Search chats"/>
+          <input id="search" value="Search files"/>
           <div id="sort">
             <div class="active">Recent </div>
             <div>Categories</div>
@@ -124,6 +150,27 @@
       </div>
     </script>
     <script type="text/x-handlebars" data-template-name="chat">
+      <div id="info_bar">
+        {{#if content.active}}
+        	{{#with content}}
+        		<div class="leave" {{ action leavechat this target="parentView" }} >Leave</div>
+        	{{/with}}
+        {{else}}
+        	{{#with content}}
+        		<div class="join" {{ action joinchat this target="parentView" }} >Join</div>
+        	{{/with}}
+        {{/if}}
+        {{#with content}}
+        	<div class="archive" {{ action archive this target="parentView" }} >Archive</div>
+        {{/with}}<span class="participants">4 members</span>
+        <div class="members">
+          <div class="member"></div>
+          <div class="member"></div>
+          <div class="member"></div>
+          <div class="member"></div>
+          <div class="member-border"></div>
+        </div>
+      </div>
       <div id="message_window">
         {{#each m in content.messages}}
          {{#with m}}
@@ -132,11 +179,11 @@
             <div class="image"><img class="profile-img" src="images/avatar@2x.png"></div>
             <div class="text">
              <div class="user">
-              <span class="name">{{ name }}</span>
-              <span class="time"> - {{ human_time }}</span>
+              <span class="name">{{ unbound name }}</span>
+              <span class="time"> - {{ unbound human_time }}</span>
              </div>
              <div class="msg">
-              <span>{{ msg }}</span>
+              <span>{{ unbound msg }}</span>
              </div>
             </div>
             <div class="clearfix"></div>
@@ -149,13 +196,5 @@
       </div>{{view App.MessageTextareaView id="response" placeholder="Send a message" valueBinding="message"}}
     </script>
     <script src="./javascripts/application.js"></script>
-    <script type="text/javascript">
-      $(document).ready(function() {
-       CodeMirror.runMode($('#message .msg .code').text(), {name: "javascript", json: true}, $('#message .msg .code').get(0))
-       $(".ellipsis").dotdotdot();
-      });
-      
-      
-    </script>
   </body>
 </html>
