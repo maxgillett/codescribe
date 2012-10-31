@@ -340,15 +340,6 @@ DS.ManyArray = DS.RecordArray.extend({
     store.fetchUnloadedClientIds(type, clientIds);
   },
 
-  // // Method to fetch only a single object
-  // fetchOne: function() {
-  //   var clientId = get(this, 'content')[0],
-  //       store = get(this, 'store'),
-  //       type = get(this, 'type');
-
-  //   store.fetchUnloadedClientIds(type, clientId);
-  // },
-
   // Overrides Ember.Array's replace method to implement
   replaceContent: function(index, removed, added) {
     // Map the array of record objects into an array of  client ids.
@@ -2353,7 +2344,7 @@ DS.Store = Ember.Object.extend({
       var adapter = get(this, '_adapter');
       id = adapter.extractId(type, hash);
     }
-    
+
     id = coerceId(id);
 
     var typeMap = this.typeMapFor(type),
@@ -2371,9 +2362,9 @@ DS.Store = Ember.Object.extend({
     } else {
       clientId = this.pushHash(hash, id, type);
     }
-    
+
     this.updateRecordArrays(type, clientId);
-    
+
     return { id: id, clientId: clientId };
   },
 

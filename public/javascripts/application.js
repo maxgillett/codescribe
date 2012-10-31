@@ -99,29 +99,23 @@ App = Em.Application.create({
         // Let observes know that content has changed
         App.get("router").get("chatpaneController").enumerableContentDidChange()
 
-        // Tell the serve to subscribe/unsubscribe to/from this chat
+        // Tell the server to subscribe/unsubscribe to/from this chat
         if (request) {
           socket.emit('subscribe', {id: this.content.id}, function(channel) {
             socket.on(channel, function(json) {
               var obj = JSON.parse(json);
 
-              ////// * Some testing
-              // var newMessage = App.store.createRecord(App.Message, {id: json._id});
-              // newMessage.adapterDidCommit();
-              // App.store.load(App.Message, json);
-              //App.store.load(App.Message, obj);
-              //var newMessage = App.Message.find(obj._id);
-
               App.store.load(App.Message, obj);
-              var newMessage = App.Message.find(obj._id);
-              newMessage.dataDidChange();
+              var newMessage = App.store.find(App.Message, obj._id);
+              var messages = App.store.find(App.Chat, obj.chat_id).get("messages");
 
-              //var messages = that.content.get("messages");
-              //messages.pushObject(newMessage);
+              messages.pushObject(newMessage);
             })
           });
         } else {
-          socket.emit('unsubscribe', {id: this.content.id});
+          socket.emit('unsubscribe', {id: this.content.id}, function(channel) {
+            socket.removeAllListeners(channel);
+          });
         }
       }
   	}),

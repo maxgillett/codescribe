@@ -126,11 +126,15 @@ io.sockets.on('connection', function (socket) {
   socket.on('subscribe', function(data, fn) {
     redisSubClient.subscribe(data.id);
     redisSubClient.on('message', function(channel, json) {
-      socket.emit(channel, json)
-      // console.log("channel" + channel);
-      // console.log("message" + json);
+      socket.emit(channel, json);
     });
     fn(data.id); // subscribe to the channel locally
+  })
+
+  socket.on('unsubscribe', function(data, fn) {
+    redisSubClient.unsubscribe(data.id);
+    redisSubClient.removeAllListeners('message');
+    fn(data.id); // unsubscribe from the channel locally
   })
 
 });
