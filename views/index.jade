@@ -5,6 +5,7 @@ html
 		link(rel='stylesheet', href='./stylesheets/codescribe.css')
 		link(rel='stylesheet', href='./javascripts/vendor/codemirror/lib/codemirror.css')
 		script(src='./javascripts/vendor/jquery-1.8.2.min.js')
+		script(src='./javascripts/vendor/underscore.js')
 		script(src='./socket.io/socket.io.js')
 		script(src='./javascripts/vendor/handlebars-1.0.rc.1.js')
 		script(src='./javascripts/vendor/moment.min.js')
@@ -96,7 +97,7 @@ html
 								{{#if active}}
 									<div class="chat-container" {{ action showChat this }}>
 										{{#view App.SingleChatView  }}
-											<span class="members">
+											<span class="members" {{bindAttr class="selected:active"}}>
 												{{#each member in participants}}
 													{{#with member}}
 														{{name}}

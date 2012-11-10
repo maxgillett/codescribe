@@ -17,8 +17,38 @@ var express = require('express')
   , check = require('validator').check
   , sanitize = require('validator').sanitize
   , _ = require('underscore')
-  , sioCookieParser = express.cookieParser("secretstring");
+  , sioCookieParser = express.cookieParser("secretstring")
+  , xmpp = require('node-xmpp');
 
+var cl = new xmpp.Client({ jid: "codescribe@maxs-mbp",
+                           password: "testing",
+                           host: "localhost",
+                           port: "5222"
+                         });
+
+cl.on('online', function() {
+  console.log("Jabber client connected");
+
+  // Update presence status to available
+  cl.send(new xmpp.Element('presence', { type: 'available' }).
+    c('show').t('chat')
+   );
+
+  // Join a room
+  cl.send(new xmpp.Element('presence', { to: "room1@conference.maxs-mbp/codescribe" }).
+    c('x', { xmlns: 'http://jabber.org/protocol/muc' })
+  );
+});
+
+cl.on('stanza', function(stanza) {
+  console.log(stanza);
+  var body = stanza.getChild('body');
+  if (!body) {
+    return;
+  }
+  var message = body.getText();
+  console.log(message);
+});
 
 // Mongo db connection instantiated
 
@@ -93,6 +123,7 @@ io.sockets.on('connection', function (socket) {
         Message: function() {
           // Add reference to chat model
           Model["Chat"].findById(data.chat_id)
+            .populate('participants')
             .exec(function(err, chat) {
               chat.messages.push(data._id);
               chat.save();
@@ -173,11 +204,10 @@ var messageSchema = new mongoose.Schema({
   time: { type: Date, default: Date.now },
   msg: String,
   chat_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat' },
-}).pre('save', function (next) {
+}).post('save', function (model, err) {
   // Post model to redis queue before save
   var json = JSON.stringify(this)
   redisClient.publish(this.chat_id, json);
-  next();
 });
 
 var Model = {
