@@ -27,6 +27,7 @@ var cl = new xmpp.Client({ jid: "codescribe@maxs-mbp",
                          });
 
 cl.on('online', function() {
+  
   console.log("Jabber client connected");
 
   // Update presence status to available
