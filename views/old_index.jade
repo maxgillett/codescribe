@@ -1,0 +1,198 @@
+doctype strict 5
+html
+	head
+		title Codescribe
+		link(rel='stylesheet', href='./stylesheets/codescribe.css')
+		link(rel='stylesheet', href='./javascripts/vendor/codemirror/lib/codemirror.css')
+		script(src='./javascripts/vendor/jquery-1.8.2.min.js')
+		script(src='./javascripts/vendor/underscore.js')
+		script(src='./socket.io/socket.io.js')
+		script(src='./javascripts/vendor/handlebars-1.0.rc.1.js')
+		script(src='./javascripts/vendor/moment.min.js')
+		script(src='./javascripts/vendor/ember.js')
+		script(src='./javascripts/vendor/ember-data.js')
+		script(src='./javascripts/vendor/codemirror/lib/codemirror.js')
+		script(src='./javascripts/vendor/codemirror/lib/util/runmode.js')
+		script(src='./javascripts/vendor/codemirror/mode/javascript/javascript.js')
+		script(src='./javascripts/vendor/jquery.dotdotdot-1.5.1.js')	
+	body
+		script(type='text/x-handlebars', 'data-template-name'='application')
+			#header
+				|	<div id="new-room" {{action createNewRoom}}>New Room</div>
+			#container
+				#navigation
+					|	<div id="dashboard" {{action goToDashboard}} {{bindAttr class="isChats:no-border-bottom isDashboard:active isDashboard:no-border-top"}}>
+					| 		<div class="text">
+					|			<div {{bindAttr class="isDashboard:white :dash-img"}}></div>
+					|			<span>Dashboard</span>
+					|		</div>
+					|	</div>
+					|	<div id="chats" {{action goToChats}} {{bindAttr class="isChats:active isFiles:no-border-bottom"}}>
+					| 		<div class="text">
+					|			<div {{bindAttr class="isChats:white :chats-img"}}></div>
+					|			<span>Chats</span>
+					|		</div>
+					|	</div>
+					|	<div id="files" {{action goToFiles}} {{bindAttr class="isFiles:active"}} >
+					| 		<div class="text">
+					|			<div {{bindAttr class="isFiles:white :files-img"}}></div>
+					|			<span>Files</span>
+					|		</div>
+					|	</div>
+					|	<div id="friends">
+					|		<div class="text">
+					|			<div class="friends-img"></div>
+					|			<span>Friends</span>
+					|		</div>	
+					|	</div>
+					#friends_list
+						li 
+							.avatar
+							span.name Max Gillett
+							span.status Offline
+						li 
+							.avatar
+							span.name Peter Thiel
+							span.status Offline
+						li 
+							.avatar
+							span.name Max Levchin
+							span.status.online Online
+						li 
+							.avatar
+							span.name Elon Musk
+							span.status Offline
+						li 
+							.avatar
+							span.name Luke Nosek
+							span.status Offline
+
+				{{ outlet navpane }}
+
+				#content 
+					{{ outlet content }}
+
+		script(type='text/x-handlebars', 'data-template-name'='dashboard')
+			#d 
+
+		script(type='text/x-handlebars', 'data-template-name'='fileinspector')
+			#d 
+
+		script(type='text/x-handlebars', 'data-template-name'='chatpane')
+			#nav_pane
+				#fixed_header	
+					.mag_icon
+					input#search(value='Search chats')
+					#sort
+						div.active Recent 
+						div Categories
+						div Favorites
+				#chat_container
+					h2 
+						span Active
+						span {{controller.activeLength}} chats
+					#group.
+						{{#each chat in controller}}
+							{{#with chat}}
+								{{#if active}}
+									<div class="chat-container" {{ action showChat this }}>
+										{{#view App.SingleChatView  }}
+											<span class="members" {{bindAttr class="selected:active"}}>
+												{{#each member in participants}}
+													{{#with member}}
+														{{name}}
+													{{/with}}
+												{{/each}}	
+											</span>
+											<span class="time">{{time}}</span>
+											<span class="text">{{preview}}</span>
+										{{/view}}
+									</div>
+								{{/if}}
+							{{/with}}
+						{{/each}}
+					h2 
+						span Today
+						span {{controller.inactiveLength}} chats
+					#group.
+						{{#each chat in controller}}
+							{{#with chat}}
+								{{#unless active}}
+									<div class="chat-container" {{ action showChat this }}>
+										{{#view App.SingleChatView  }}
+											<span class="members">
+												{{#each member in participants}}
+													{{#with member}}
+														{{name}}
+													{{/with}}
+												{{/each}}	
+											</span>
+											<span class="time">{{time}}</span>
+											<span class="text">{{preview}}</span>
+										{{/view}}
+									</div>
+								{{/unless}}
+							{{/with}}
+						{{/each}}
+
+
+		script(type='text/x-handlebars', 'data-template-name'='filelist')
+			#nav_pane.filelist
+				#fixed_header	
+					.mag_icon
+					input#search(value='Search files')
+					#sort
+						div.active Recent 
+						div Categories
+						div Favorites
+				#chat_container
+					
+		script(type='text/x-handlebars', 'data-template-name'='chat')
+			#info_bar
+				| {{#if content.active}}
+				| 	{{#with content}}
+				| 		<div class="leave" {{ action leavechat this target="parentView" }} >Leave</div>
+				| 	{{/with}}
+				| {{else}}
+				| 	{{#with content}}
+				| 		<div class="join" {{ action joinchat this target="parentView" }} >Join</div>
+				| 	{{/with}}
+				| {{/if}}
+				| {{#with content}}
+				| 	<div class="archive" {{ action archive this target="parentView" }} >Archive</div>
+				| {{/with}}
+				span.participants 4 members
+				.members
+					.member
+					.member
+					.member
+					.member
+					.member-border
+			#message_window.
+				{{#each m in content.messages}}
+					{{#with m}}
+						{{#view App.MessagesView }}
+							<div id="message">
+								<div class="image"><img class="profile-img" src="images/avatar@2x.png"></div>
+								<div class="text">
+									<div class="user">
+										<span class="name">{{ unbound name }}</span>
+										<span class="time"> - {{ unbound human_time }}</span>
+									</div>
+									<div class="msg">
+										<span>{{ unbound msg }}</span>
+									</div>
+								</div>
+								<div class="clearfix"></div>
+							</div>
+							<div id="divider"></div>
+						{{/view}}
+					{{/with}}
+				{{/each}}
+
+			{{view App.MessageTextareaView id="response" placeholder="Send a message" valueBinding="message"}}
+
+
+		script(src='./javascripts/application.js')
+
+

@@ -1,0 +1,201 @@
+<!DOCTYPE strict 5>
+<html>
+  <head>
+    <title>Codescribe</title>
+    <link rel="stylesheet" href="./stylesheets/codescribe.css"/>
+    <link rel="stylesheet" href="./javascripts/vendor/codemirror/lib/codemirror.css"/>
+    <script src="./javascripts/vendor/jquery-1.8.2.min.js"></script>
+    <script src="./javascripts/vendor/underscore.js"></script>
+    <script src="./socket.io/socket.io.js"></script>
+    <script src="./javascripts/vendor/handlebars-1.0.rc.1.js"></script>
+    <script src="./javascripts/vendor/moment.min.js"></script>
+    <script src="./javascripts/vendor/ember.js"></script>
+    <script src="./javascripts/vendor/ember-data.js"></script>
+    <script src="./javascripts/vendor/codemirror/lib/codemirror.js"></script>
+    <script src="./javascripts/vendor/codemirror/lib/util/runmode.js"></script>
+    <script src="./javascripts/vendor/codemirror/mode/javascript/javascript.js"></script>
+    <script src="./javascripts/vendor/jquery.dotdotdot-1.5.1.js">	</script>
+  </head>
+  <body>
+    <script type="text/x-handlebars" data-template-name="application">
+      <div id="header">	<div id="new-room" {{action createNewRoom}}>New Room</div></div>
+      <div id="container">
+        <div id="navigation">
+          	<div id="dashboard" {{action goToDashboard}} {{bindAttr class="isChats:no-border-bottom isDashboard:active isDashboard:no-border-top"}}>
+          		<div class="text">
+          			<div {{bindAttr class="isDashboard:white :dash-img"}}></div>
+          			<span>Dashboard</span>
+          		</div>
+          	</div>
+          	<div id="chats" {{action goToChats}} {{bindAttr class="isChats:active isFiles:no-border-bottom"}}>
+          		<div class="text">
+          			<div {{bindAttr class="isChats:white :chats-img"}}></div>
+          			<span>Chats</span>
+          		</div>
+          	</div>
+          	<div id="files" {{action goToFiles}} {{bindAttr class="isFiles:active"}} >
+          		<div class="text">
+          			<div {{bindAttr class="isFiles:white :files-img"}}></div>
+          			<span>Files</span>
+          		</div>
+          	</div>
+          	<div id="friends">
+          		<div class="text">
+          			<div class="friends-img"></div>
+          			<span>Friends</span>
+          		</div>	
+          	</div>
+          <div id="friends_list">
+            <li> 
+              <div class="avatar"></div><span class="name">Max Gillett</span><span class="status">Offline</span>
+            </li>
+            <li> 
+              <div class="avatar"></div><span class="name">Peter Thiel</span><span class="status">Offline</span>
+            </li>
+            <li> 
+              <div class="avatar"></div><span class="name">Max Levchin</span><span class="status online">Online</span>
+            </li>
+            <li> 
+              <div class="avatar"></div><span class="name">Elon Musk</span><span class="status">Offline</span>
+            </li>
+            <li> 
+              <div class="avatar"></div><span class="name">Luke Nosek</span><span class="status">Offline</span>
+            </li>
+          </div>
+        </div>{{ outlet navpane }}
+        <div id="content">
+           
+          {{ outlet content }}
+        </div>
+      </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="dashboard">
+      <div id="d"> </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="fileinspector">
+      <div id="d"> </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="chatpane">
+      <div id="nav_pane">
+        <div id="fixed_header">	
+          <div class="mag_icon"></div>
+          <input id="search" value="Search chats"/>
+          <div id="sort">
+            <div class="active">Recent </div>
+            <div>Categories</div>
+            <div>Favorites</div>
+          </div>
+        </div>
+        <div id="chat_container">
+          <h2> <span>Active</span><span>{{controller.activeLength}} chats</span></h2>
+          <div id="group">
+            {{#each chat in controller}}
+             {{#with chat}}
+              {{#if active}}
+               <div class="chat-container" {{ action showChat this }}>
+                {{#view App.SingleChatView  }}
+                 <span class="members" {{bindAttr class="selected:active"}}>
+                  {{#each member in participants}}
+                   {{#with member}}
+                    {{name}}
+                   {{/with}}
+                  {{/each}}	
+                 </span>
+                 <span class="time">{{time}}</span>
+                 <span class="text">{{preview}}</span>
+                {{/view}}
+               </div>
+              {{/if}}
+             {{/with}}
+            {{/each}}
+          </div>
+          <h2> <span>Today</span><span>{{controller.inactiveLength}} chats</span></h2>
+          <div id="group">
+            {{#each chat in controller}}
+             {{#with chat}}
+              {{#unless active}}
+               <div class="chat-container" {{ action showChat this }}>
+                {{#view App.SingleChatView  }}
+                 <span class="members">
+                  {{#each member in participants}}
+                   {{#with member}}
+                    {{name}}
+                   {{/with}}
+                  {{/each}}	
+                 </span>
+                 <span class="time">{{time}}</span>
+                 <span class="text">{{preview}}</span>
+                {{/view}}
+               </div>
+              {{/unless}}
+             {{/with}}
+            {{/each}}
+            
+            
+          </div>
+        </div>
+      </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="filelist">
+      <div id="nav_pane" class="filelist">
+        <div id="fixed_header">	
+          <div class="mag_icon"></div>
+          <input id="search" value="Search files"/>
+          <div id="sort">
+            <div class="active">Recent </div>
+            <div>Categories</div>
+            <div>Favorites</div>
+          </div>
+        </div>
+        <div id="chat_container"></div>
+      </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="chat">
+      <div id="info_bar">
+        {{#if content.active}}
+        	{{#with content}}
+        		<div class="leave" {{ action leavechat this target="parentView" }} >Leave</div>
+        	{{/with}}
+        {{else}}
+        	{{#with content}}
+        		<div class="join" {{ action joinchat this target="parentView" }} >Join</div>
+        	{{/with}}
+        {{/if}}
+        {{#with content}}
+        	<div class="archive" {{ action archive this target="parentView" }} >Archive</div>
+        {{/with}}<span class="participants">4 members</span>
+        <div class="members">
+          <div class="member"></div>
+          <div class="member"></div>
+          <div class="member"></div>
+          <div class="member"></div>
+          <div class="member-border"></div>
+        </div>
+      </div>
+      <div id="message_window">
+        {{#each m in content.messages}}
+         {{#with m}}
+          {{#view App.MessagesView }}
+           <div id="message">
+            <div class="image"><img class="profile-img" src="images/avatar@2x.png"></div>
+            <div class="text">
+             <div class="user">
+              <span class="name">{{ unbound name }}</span>
+              <span class="time"> - {{ unbound human_time }}</span>
+             </div>
+             <div class="msg">
+              <span>{{ unbound msg }}</span>
+             </div>
+            </div>
+            <div class="clearfix"></div>
+           </div>
+           <div id="divider"></div>
+          {{/view}}
+         {{/with}}
+        {{/each}}
+        
+      </div>{{view App.MessageTextareaView id="response" placeholder="Send a message" valueBinding="message"}}
+    </script>
+    <script src="./javascripts/application.js"></script>
+  </body>
+</html>

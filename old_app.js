@@ -20,35 +20,35 @@ var express = require('express')
   , sioCookieParser = express.cookieParser("secretstring")
   , xmpp = require('node-xmpp');
 
-// var cl = new xmpp.Client({ jid: "codescribe@maxs-mbp",
-//                            password: "testing",
-//                            host: "localhost",
-//                            port: "5222"
-//                          });
+var cl = new xmpp.Client({ jid: "codescribe@maxs-mbp",
+                           password: "testing",
+                           host: "localhost",
+                           port: "5222"
+                         });
 
-// cl.on('online', function() {
-//   console.log("Jabber client connected");
+cl.on('online', function() {
+  console.log("Jabber client connected");
 
-//   // Update presence status to available
-//   cl.send(new xmpp.Element('presence', { type: 'available' }).
-//     c('show').t('chat')
-//    );
+  // Update presence status to available
+  cl.send(new xmpp.Element('presence', { type: 'available' }).
+    c('show').t('chat')
+   );
 
-//   // Join a room
-//   cl.send(new xmpp.Element('presence', { to: "room1@conference.maxs-mbp/codescribe" }).
-//     c('x', { xmlns: 'http://jabber.org/protocol/muc' })
-//   );
-// });
+  // Join a room
+  cl.send(new xmpp.Element('presence', { to: "room1@conference.maxs-mbp/codescribe" }).
+    c('x', { xmlns: 'http://jabber.org/protocol/muc' })
+  );
+});
 
-// cl.on('stanza', function(stanza) {
-//   console.log(stanza);
-//   var body = stanza.getChild('body');
-//   if (!body) {
-//     return;
-//   }
-//   var message = body.getText();
-//   console.log(message);
-// });
+cl.on('stanza', function(stanza) {
+  console.log(stanza);
+  var body = stanza.getChild('body');
+  if (!body) {
+    return;
+  }
+  var message = body.getText();
+  console.log(message);
+});
 
 // Mongo db connection instantiated
 
@@ -92,8 +92,6 @@ var utils = {
 
 io.sockets.on('connection', function (socket) {
 
-  console.log("Socket connection established");
-
   // Set current user id
 
   sioCookieParser(socket.handshake, {}, function(err) {
@@ -102,81 +100,56 @@ io.sockets.on('connection', function (socket) {
     });
   });
 
+  console.log("Socket connection established");
+
   // SOCKETAdapter listeners
 
   socket.on('createRecord', function (type, data, fn) {
-
     // Modify data if it is a message
     if (type == "Message") {
       socket.get('uid', function(err, uid) {
         data.user = uid;
       });
     }
-
-    if (type == "Team") {
-      socket.get('uid', function(err, uid) {
-        data.members = [uid];
-      });
-    }
-
     Model[type].create(data, function(err, data) {
-      try {
-        var execute = {
-          Chat: function() {
-            Model["Chat"].findById(data._id)
-              .populate('participants')
-              .exec(function(err, chat) {
-                utils.sockets.relayResponse(err, chat, type, fn);
-              });
-          },
-          Message: function() {
-            // Add reference to chat model
-            Model["Chat"].findById(data.chat_id)
-              .populate('participants')
-              .exec(function(err, chat) {
-                chat.messages.push(data._id);
-                chat.save();
-              });
-            utils.sockets.relayResponse(err, data, type, fn);
-          },
-          Team: function() {
-            Model["Team"].findById(data._id)
-              .populate('members')
-              .exec(function(err, team) {
-                utils.sockets.relayResponse(err, team, type, fn);
-              });            
-          }
-        };
-        execute[type]();
-      } catch(e) {
-        console.log(e);
-      }
+      var execute = {
+        Chat: function() {
+          Model["Chat"].findById(data._id)
+            .populate('participants')
+            .exec(function(err, chat) {
+              utils.sockets.relayResponse(err, chat, type, fn);
+            });
+        },
+        Message: function() {
+          // Add reference to chat model
+          Model["Chat"].findById(data.chat_id)
+            .populate('participants')
+            .exec(function(err, chat) {
+              chat.messages.push(data._id);
+              chat.save();
+            });
+          utils.sockets.relayResponse(err, data, type, fn);
+        }
+      };
+      execute[type]();
     });
   });
 
   socket.on('findAll', function (type, fn) {
-    try {
-      Model[type].find({})
-        .populate('members')
-        .exec(function(err, data) {
-          utils.sockets.relayResponse(err, data, type, fn);
-        });
-    } catch(e) {
-      console.log(e)
-    }
+    Model[type].find({})
+      .populate('participants')
+      .exec(function(err, data) {
+        utils.sockets.relayResponse(err, data, type, fn);
+      });
   });
 
   socket.on('find', function (type, id, fn) {
-    try {
-      Model[type].findById(id)
-        .populate('members')
-        .exec(function(err, data) {
-          console.log(data);
-          utils.sockets.relayResponse(err, data, type, fn);
-        });
-    } catch(e) {
-      console.log(e)
-    }
+    Model[type].findById(id)
+      .populate('participants')
+      .exec(function(err, data) {
+        console.log(data);
+        utils.sockets.relayResponse(err, data, type, fn);
+      });
   });
 
   // Message listeners
@@ -198,12 +171,6 @@ io.sockets.on('connection', function (socket) {
 });
 
 // Set up mongo schemas and models
-
-var teamSchema = new mongoose.Schema({
-  name: String,
-  slots: String,
-  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
-});
 
 var userSchema = new mongoose.Schema({
   uid: { type: String, unique: true },
@@ -244,7 +211,6 @@ var messageSchema = new mongoose.Schema({
 });
 
 var Model = {
-  Team: db.model('Team', teamSchema),
   User: db.model('User', userSchema),
   Chat: db.model('Chat', chatSchema),
   Message: db.model('Message', messageSchema)
