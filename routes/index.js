@@ -7,6 +7,10 @@ app.get('/', function(req, res){
 	res.render('index');
 });
 
+app.get('/teams', ensureAuthenticated, function(req, res){
+	res.render('index');
+});
+
 app.get('/auth/github', passport.authenticate('github'));
 
 app.get('/auth/github/callback', 
@@ -15,3 +19,8 @@ app.get('/auth/github/callback',
 		successRedirect: '/'
 	})
 );
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/')
+}

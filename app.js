@@ -64,7 +64,7 @@ var redisClient = exports.redisClient = redis.createClient(),
     redisSubClient = exports.redisSubClient = redis.createClient(),
     sessionStore = exports.sessionStore = new RedisStore({client: redisClient});
 
-// 
+// Utils
 
 var utils = {
   verifyAlpha: function(str) {
@@ -141,7 +141,6 @@ io.sockets.on('connection', function (socket) {
           },
           Team: function() {
             Model["Team"].findById(data._id)
-              .populate('members')
               .exec(function(err, team) {
                 utils.sockets.relayResponse(err, team, type, fn);
               });            
@@ -156,11 +155,13 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('findAll', function (type, fn) {
     try {
-      Model[type].find({})
-        .populate('members')
+      socket.get('uid', function(err, uid) {
+        Model[type].find({})
+        .where('members').in([uid])
         .exec(function(err, data) {
           utils.sockets.relayResponse(err, data, type, fn);
         });
+      });
     } catch(e) {
       console.log(e)
     }
@@ -169,9 +170,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('find', function (type, id, fn) {
     try {
       Model[type].findById(id)
-        .populate('members')
         .exec(function(err, data) {
-          console.log(data);
           utils.sockets.relayResponse(err, data, type, fn);
         });
     } catch(e) {
@@ -202,14 +201,16 @@ io.sockets.on('connection', function (socket) {
 var teamSchema = new mongoose.Schema({
   name: String,
   slots: String,
-  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  pending: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
 var userSchema = new mongoose.Schema({
   uid: { type: String, unique: true },
   name: String,
   username: String,
-  avatar: String
+  avatar: String,
+  email: String,
 });
 
 userSchema.statics.findOrCreate = function(data, done) {
@@ -266,12 +267,14 @@ passport.use(new GitHubStrategy({
     callbackURL: config.auth.github.callbackURL
   },
   function(accessToken, refreshToken, profile, done) {
+    console.log(profile);
     process.nextTick(function () {
       var data = {
         uid: profile.id,
         name: profile.displayName,
         username: profile.username,
-        avatar: profile._json.avatar_url
+        avatar: profile._json.avatar_url,
+        email: profile._json.email
       }
       Model.User.findOrCreate(data, done);
     });

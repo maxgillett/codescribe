@@ -60,7 +60,7 @@ listing {
   left: 125px;
   padding: 20px;
 }
-#team {
+.team {
   float: left;
   margin-right: 20px;
   width: 225px;
@@ -77,27 +77,27 @@ listing {
   position: relative;
   left: 6px;
 }
-#team:first-child #name {
+.team:first-of-type #name {
   background: #8a646c;
 }
-#team:nth-child(2) #name {
+.team:nth-of-type(2) #name {
   background: #64728a;
 }
-#team #name .room {
+.team #name .room {
   position: absolute;
   right: 10px;
   top: 6px;
   width: 25px;
   height: 18px;
 }
-#team:first-child #name .room {
+.team:first-of-type #name .room {
   background: #b48e97;
 }
-#team:nth-child(2) #name .room {
+.team:nth-of-type(2) #name .room {
   background: #8b96ab;
 }
 #members {
-  padding: 10px;
+  padding: 10px 10px 0px 10px;
 }
 #members .memb {
   position: relative;
@@ -126,6 +126,7 @@ listing {
   padding: 6px;
 }
 #members .memb .pref {
+  display: none;
   position: absolute;
   top: 4px;
   right: 4px;
@@ -133,11 +134,16 @@ listing {
   height: 20px;
   image: '/images/edit-img.png' 20px 20px;
 }
-#members .memb:last-child {
-  margin-bottom: 0;
-}
 #members .memb.open {
+  font-size: 12px;
+  padding: 5px;
+  height: 30px;
+  width: 206px;
   background: #dadada;
   color: #9a9a9a;
   border: 2px solid #b3b3b3;
+}
+#members .memb.pending span {
+  color: #8c8c8c;
+  padding-left: 18px;
 }

@@ -29,31 +29,41 @@
          <span>Add team</span>
         </div>
         
+        
       </div>
       <div id="team-container">
         {{#each team in content}}
          {{#with team}}
           {{#view App.SingleTeamView}}
-           <div id="team">
-            <div id="name">
-             <span>{{ name }}</span>
-             <div class="room"></div>
-            </div>
-            <div class="members">
-             {{#each member in team}}
-              {{#with member}}	
-               <div class="memb">
-                {{#if online}}
-                 <div class="online"></div>
-                {{else}}
-                 <div class="offline"></div>
-                {{/if}}
-                <span>{{ name }}</span>
-                <div class="pref"></div>
-               </div>
-              {{/with}}
-             {{/each}}
-            </div>
+           <div id="name">
+            <span>{{ name }}</span>
+            <div class="room"></div>
+           </div>
+           <div id="members">
+            {{#each member in members}}
+             {{#with member}}	
+              <div class="memb">
+               {{#if online}}
+                <div class="online"></div>
+               {{else}}
+                <div class="offline"></div>
+               {{/if}}
+               <span>{{ name }}</span>
+               <div class="pref"></div>
+              </div>
+             {{/with}}
+            {{/each}}
+            {{#each member in pending}}
+             {{#with member}}	
+              <div class="memb pending">
+               <span>{{ name }}</span>
+               <div class="pref"></div>
+              </div>
+             {{/with}}
+            {{/each}}
+            {{#each slot in openSlots}}
+             {{view App.InviteTeamMemberTextareaView placeholder="Add a member" teamBinding="team"}}
+            {{/each}}		
            </div>
           {{/view}}
          {{/with}}
@@ -61,47 +71,8 @@
         
         
         
-        
       </div>
     </script>
-    <script src="./javascripts/application.js">
-      //- #team
-      //- 	#name 
-      //- 		span CodeScribe
-      //- 		.room 
-      //- 	#members
-      //- 		.memb
-      //- 			.online
-      //- 			span Max Gillett
-      //- 			.pref
-      //- 		.memb
-      //- 			.offline
-      //- 			span Gus Fring
-      //- 			.pref
-      //- 		.memb
-      //- 			.online
-      //- 			span Jesse Pinkman
-      //- 			.pref
-      //- 		.memb.open
-      //- 			span Add a member
-      //- 		.memb.open
-      //- 			span Add a member
-      
-      
-      //- #team
-      //- 	#name
-      //- 		span Ember
-      //- 		.room
-      //- 	#members
-      //- 		.memb
-      //- 			.online
-      //- 			span Max Gillett
-      //- 			.pref
-      //- 		.memb
-      //- 			.offline
-      //- 			span Walter White
-      //- 			.pref	
-      
-    </script>
+    <script src="./javascripts/application.js"></script>
   </body>
 </html>

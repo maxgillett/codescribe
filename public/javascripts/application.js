@@ -32,6 +32,12 @@ App = Em.Application.create({
       console.log("Creating a new team");
       App.store.createRecord(App.Team,  { name: "Untitled", slots: 5 });
       App.store.commit();
+    },
+    addMember: function(team, member) {
+      console.log("Creating a new member");
+      var pending = team.get("pending");
+      var pendingUser = App.store.find(App.User, "50a1db927b1b2c8d71000001");
+      pending.pushObject(pendingUser);
     }
   }),
 
@@ -40,27 +46,49 @@ App = Em.Application.create({
   }),
 
   SingleTeamView:  Em.View.extend({
+    classNames: ["team"]
+  }),
+
+  InviteTeamMemberTextareaView:  Em.TextField.extend({
+    classNames: ["memb", "open"],
+    keyDown: function(e) {
+      if (e.which == 13) {
+        e.preventDefault();
+        var team = this.get("team")
+            member = this.get("value");
+        App.router.get("dashboardController").addMember(team, member);
+      }
+    }
   }),
 
 	Router: Ember.Router.extend({
-		//location: 'history',
+		location: 'history',
 		enableLogging: true,
-		
-    goToDashboard:  function() {
-
-		},
-
-		goToChat:  function() {
-
-		},
 
     root:  Ember.Route.extend({
     	dashboard:  Ember.Route.extend({
     		route:  '/',
     		connectOutlets: function(router, context) {
-          var teams = App.store.findAll(App.Team);
-    			router.get('applicationController').connectOutlet('content', 'dashboard', teams);
     		}
+      }),
+      teams:  Em.Route.extend({
+        route: '/teams',
+        index: Em.Route.extend({
+          route: '/',
+          connectOutlets: function(router, context) {
+            var teams = App.store.findAll(App.Team);
+            router.get('applicationController').connectOutlet('content', 'dashboard', teams);
+          }
+        }),
+        team: Em.Route.extend({
+          route: '/:id',
+          connectOutlets: function(router, team) {
+
+          },
+          deserialize: function(router, params) {
+            return App.store.find(App.Team, params.id);
+          }
+        })
       })
 	 })
 
@@ -73,6 +101,7 @@ App = Em.Application.create({
 var socket = io.connect('http://localhost:3000');
 
 socket.on('connect', function () {
+
 });
 
 
@@ -101,15 +130,14 @@ DS.SOCKETserializer = DS.Serializer.extend({
 })();
 
 
-
 App.SOCKETadapter = DS.Adapter.extend({
 
   serializer: DS.SOCKETserializer.create(),
 
 	find:  function(store, type, id) {
+    debugger;
 		var that = this;
     var root = this.convertToRoot(type);
-
     socket.emit('find', root, id, function(response) {
       if (response.success) {
         that.didFindRecord(store, type, response.json)
@@ -255,7 +283,6 @@ App.SOCKETadapter = DS.Adapter.extend({
     return root;
   }
 
-
 });
 
 
@@ -263,6 +290,7 @@ App.SOCKETadapter = DS.Adapter.extend({
 
 App.SOCKETadapter.map("App.Team", { primaryKey: "_id" });
 App.SOCKETadapter.map("App.User", { primaryKey: "_id" });
+
 
 // Store
 
@@ -282,7 +310,14 @@ App.store = DS.Store.create({
 App.Team = DS.Model.extend({
   name: DS.attr('string'),
   slots: DS.attr('string'),
-  members: DS.hasMany('App.User')
+  members: DS.hasMany('App.User'),
+  pending: DS.hasMany('App.User'),
+  openSlots: function() {
+    var len = this.get("slots") 
+              - this.get("members").get("length")
+              - this.get("pending").get("length");
+    return new Array(len)
+  }.property('members.length', 'pending.length')
 });
 
 App.User = DS.Model.extend({
@@ -290,6 +325,7 @@ App.User = DS.Model.extend({
   name: DS.attr('string'),
   avatar: DS.attr('string'),
   username: DS.attr('string'),
+  email: DS.attr('string'),
   online: DS.attr('string')
 });
 
