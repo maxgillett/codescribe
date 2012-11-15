@@ -9,279 +9,24 @@ var express = require('express')
   , stylus = require('stylus')
   , nib = require('nib')
   , jade = require('jade')
-  , ember = require('ember')
-  , mongo = require('mongodb')
-  , mongoose = require('mongoose')
   , redis = require('redis')
   , RedisStore = require('connect-redis')(express)
   , check = require('validator').check
   , sanitize = require('validator').sanitize
   , _ = require('underscore')
-  , sioCookieParser = express.cookieParser("secretstring")
-  , xmpp = require('node-xmpp');
+  , sioCookieParser = express.cookieParser("secretstring");
 
-// var cl = new xmpp.Client({ jid: "codescribe@maxs-mbp",
-//                            password: "testing",
-//                            host: "localhost",
-//                            port: "5222"
-//                          });
-
-// cl.on('online', function() {
-//   console.log("Jabber client connected");
-
-//   // Update presence status to available
-//   cl.send(new xmpp.Element('presence', { type: 'available' }).
-//     c('show').t('chat')
-//    );
-
-//   // Join a room
-//   cl.send(new xmpp.Element('presence', { to: "room1@conference.maxs-mbp/codescribe" }).
-//     c('x', { xmlns: 'http://jabber.org/protocol/muc' })
-//   );
-// });
-
-// cl.on('stanza', function(stanza) {
-//   console.log(stanza);
-//   var body = stanza.getChild('body');
-//   if (!body) {
-//     return;
-//   }
-//   var message = body.getText();
-//   console.log(message);
-// });
-
-// Mongo db connection instantiated
-
-var db = mongoose.createConnection('localhost', 'test');
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function () {
-  console.log("Mongo db connection established")
-});
-
-// Redis and session store setup
+// Setup Redis and session store
 
 var redisClient = exports.redisClient = redis.createClient(),
     redisSubClient = exports.redisSubClient = redis.createClient(),
     sessionStore = exports.sessionStore = new RedisStore({client: redisClient});
 
-// Utils
+// Set up database (and models)
 
-var utils = {
-  verifyAlpha: function(str) {
-    try {
-      return check(str).isAlpha();
-    } catch(e) {
-      console.log(e.message);
-      // Throw a new error
-    }
-  },
-  sockets: {
-    relayResponse:  function(err, data, type, fn) {
-      if (err) return "Error";
-      var obj = {
-        success: true,
-        json: {}
-      };
-      obj.json[type] = data;
-      fn(obj);
-    }
-  }
-};
+var db = require('./config/db')
 
-// Socket listeners
-
-io.sockets.on('connection', function (socket) {
-
-  console.log("Socket connection established");
-
-  // Set current user id
-
-  sioCookieParser(socket.handshake, {}, function(err) {
-    sessionStore.get(socket.handshake.signedCookies['codescribe'], function(err, data) {
-      socket.set('uid', data.passport.user, function() {});
-    });
-  });
-
-  // SOCKETAdapter listeners
-
-  socket.on('createRecord', function (type, data, fn) {
-
-    // Modify data if it is a message
-    if (type == "Message") {
-      socket.get('uid', function(err, uid) {
-        data.user = uid;
-      });
-    }
-
-    if (type == "Team") {
-      socket.get('uid', function(err, uid) {
-        data.members = [uid];
-      });
-    }
-
-    Model[type].create(data, function(err, data) {
-      try {
-        var execute = {
-          Chat: function() {
-            Model["Chat"].findById(data._id)
-              .populate('participants')
-              .exec(function(err, chat) {
-                utils.sockets.relayResponse(err, chat, type, fn);
-              });
-          },
-          Message: function() {
-            // Add reference to chat model
-            Model["Chat"].findById(data.chat_id)
-              .populate('participants')
-              .exec(function(err, chat) {
-                chat.messages.push(data._id);
-                chat.save();
-              });
-            utils.sockets.relayResponse(err, data, type, fn);
-          },
-          Team: function() {
-            Model["Team"].findById(data._id)
-              .exec(function(err, team) {
-                utils.sockets.relayResponse(err, team, type, fn);
-              });            
-          }
-        };
-        execute[type]();
-      } catch(e) {
-        console.log(e);
-      }
-    });
-  });
-
-  socket.on('findAll', function (type, fn) {
-    try {
-      socket.get('uid', function(err, uid) {
-        Model[type].find({})
-        .where('members').in([uid])
-        .exec(function(err, data) {
-          utils.sockets.relayResponse(err, data, type, fn);
-        });
-      });
-    } catch(e) {
-      console.log(e)
-    }
-  });
-
-  socket.on('find', function (type, id, fn) {
-    try {
-      Model[type].findById(id)
-        .exec(function(err, data) {
-          utils.sockets.relayResponse(err, data, type, fn);
-        });
-    } catch(e) {
-      console.log(e)
-    }
-  });
-
-  // Message listeners
-
-  socket.on('subscribe', function(data, fn) {
-    redisSubClient.subscribe(data.id);
-    redisSubClient.on('message', function(channel, json) {
-      socket.emit(channel, json);
-    });
-    fn(data.id); // subscribe to the channel locally
-  })
-
-  socket.on('unsubscribe', function(data, fn) {
-    redisSubClient.unsubscribe(data.id);
-    redisSubClient.removeAllListeners('message');
-    fn(data.id); // unsubscribe from the channel locally
-  })
-
-});
-
-// Set up mongo schemas and models
-
-var teamSchema = new mongoose.Schema({
-  name: String,
-  slots: String,
-  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  pending: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
-});
-
-var userSchema = new mongoose.Schema({
-  uid: { type: String, unique: true },
-  name: String,
-  username: String,
-  avatar: String,
-  email: String,
-});
-
-userSchema.statics.findOrCreate = function(data, done) {
-  var that = this;
-  var user = this.findOne({uid: data.uid}, 'name', function(err, user) {
-    if (!user) {
-      that.create(data, function(err, newuser) {
-        return done(null, newuser);
-      });
-    } 
-    done(null, user);
-  });
-}
-
-var chatSchema = new mongoose.Schema({
-  created_at: { type: Date, default: Date.now },
-  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }]
-}).post('save', function (model, err) {
-    // Create a queue representing this chat in redis after save
-});
-
-var messageSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  time: { type: Date, default: Date.now },
-  msg: String,
-  chat_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat' },
-}).post('save', function (model, err) {
-  // Post model to redis queue before save
-  var json = JSON.stringify(this)
-  redisClient.publish(this.chat_id, json);
-});
-
-var Model = {
-  Team: db.model('Team', teamSchema),
-  User: db.model('User', userSchema),
-  Chat: db.model('Chat', chatSchema),
-  Message: db.model('Message', messageSchema)
-}
-
-// Passport setup
-
-passport.serializeUser(function(user, done) {
-  done(null, user._id);
-});
-
-passport.deserializeUser(function(obj, done) {
-  done(null, obj);
-});
-
-passport.use(new GitHubStrategy({
-    clientID: config.auth.github.clientId,
-    clientSecret: config.auth.github.clientSecret,
-    callbackURL: config.auth.github.callbackURL
-  },
-  function(accessToken, refreshToken, profile, done) {
-    console.log(profile);
-    process.nextTick(function () {
-      var data = {
-        uid: profile.id,
-        name: profile.displayName,
-        username: profile.username,
-        avatar: profile._json.avatar_url,
-        email: profile._json.email
-      }
-      Model.User.findOrCreate(data, done);
-    });
-  }
-));
-
-// Create and configure express app
+// Configure express app
 
 app.configure(function() {
   this.set('view engine', 'jade');
@@ -311,7 +56,42 @@ app.configure(function() {
   this.use(app.router);
 });
 
+// Set up passport
+
+passport.serializeUser(function(user, done) {
+  done(null, user._id);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
+
+passport.use(new GitHubStrategy({
+    clientID: config.auth.github.clientId,
+    clientSecret: config.auth.github.clientSecret,
+    callbackURL: config.auth.github.callbackURL
+  },
+  function(accessToken, refreshToken, profile, done) {
+    console.log(profile);
+    process.nextTick(function () {
+      var data = {
+        uid: profile.id,
+        name: profile.displayName,
+        username: profile.username,
+        avatar: profile._json.avatar_url,
+        email: profile._json.email
+      }
+      db.user.findOrCreate(data, done);
+    });
+  }
+));
+
+// Load models, controllers, and routes
+
+require('./config/boot')({ verbose: !module.parent });
 require('./routes');
+
+// Listen on 3000
 
 server.listen(3000);
 console.log('Listening on port 3000');

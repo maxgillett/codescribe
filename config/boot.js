@@ -1,23 +1,17 @@
-var express = require('../../..')
+var app = require('../app').app
   , fs = require('fs');
 
-  var express = require('../../..')
-  , fs = require('fs');
-
-module.exports = function(parent, options){
+module.exports = function(options){
   var verbose = options.verbose;
+
+  // Import controllers
   fs.readdirSync(__dirname + '/../controllers').forEach(function(name){
     verbose && console.log('\n   %s:', name);
-    var obj = require('./../controllers/' + name)
+    var obj = require('../controllers/' + name)
       , name = obj.name || name
-      , prefix = obj.prefix || ''
-      , app = express()
+      , prefix = '/api/v1'
       , method
       , path;
-
-    // allow specifying the view engine
-    //if (obj.engine) app.set('view engine', obj.engine);
-    //app.set('views', __dirname + '/../controllers/' + name + '/views');
 
     // before middleware support
     if (obj.before) {
@@ -38,7 +32,7 @@ module.exports = function(parent, options){
       switch (key) {
         case 'show':
           method = 'get';
-          path = '/' + name + '/:' + name + '_id';
+          path = '/' + name + '/:id';
           break;
         case 'list':
           method = 'get';
@@ -46,11 +40,11 @@ module.exports = function(parent, options){
           break;
         case 'edit':
           method = 'get';
-          path = '/' + name + '/:' + name + '_id/edit';
+          path = '/' + name + '/:id/edit';
           break;
         case 'update':
           method = 'put';
-          path = '/' + name + '/:' + name + '_id';
+          path = '/' + name + '/:id';
           break;
         case 'create':
           method = 'post';
@@ -58,7 +52,7 @@ module.exports = function(parent, options){
           break;
         case 'index':
           method = 'get';
-          path = '/';
+          path = '/' + name + 's';
           break;
         default:
           throw new Error('unrecognized route: ' + name + '.' + key);
@@ -69,7 +63,5 @@ module.exports = function(parent, options){
       verbose && console.log('     %s %s -> %s', method.toUpperCase(), path, key);
     }
 
-    // mount the app
-    parent.use(app);
   });
 };

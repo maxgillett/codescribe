@@ -105,198 +105,199 @@ socket.on('connect', function () {
 });
 
 
-// Sockets serializer
+// // Sockets serializer
 
-(function() {
-var get = Ember.get;
+// (function() {
+// var get = Ember.get;
 
-DS.SOCKETserializer = DS.Serializer.extend({
-  keyForBelongsTo: function(type, name) {
-    return this.keyForAttributeName(type, name) + "_id";
-  },
+// DS.SOCKETserializer = DS.Serializer.extend({
+//   keyForBelongsTo: function(type, name) {
+//     return this.keyForAttributeName(type, name) + "_id";
+//   },
 
-  keyForAttributeName: function(type, name) {
-    return Ember.String.decamelize(name);
-  },
+//   keyForAttributeName: function(type, name) {
+//     return Ember.String.decamelize(name);
+//   },
 
-  addBelongsTo: function(hash, record, key, relationship) {
-    var hashKey = this._keyForBelongsTo(record.constructor, key),
-        id = get(record, key+'.id');
+//   addBelongsTo: function(hash, record, key, relationship) {
+//     var hashKey = this._keyForBelongsTo(record.constructor, key),
+//         id = get(record, key+'.id');
 
-    if (!Ember.none(id)) { hash[hashKey] = id; }
-  }
-});
+//     if (!Ember.none(id)) { hash[hashKey] = id; }
+//   }
+// });
 
-})();
+// })();
 
 
-App.SOCKETadapter = DS.Adapter.extend({
+// App.SOCKETadapter = DS.Adapter.extend({
 
-  serializer: DS.SOCKETserializer.create(),
+//   serializer: DS.SOCKETserializer.create(),
 
-	find:  function(store, type, id) {
-    debugger;
-		var that = this;
-    var root = this.convertToRoot(type);
-    socket.emit('find', root, id, function(response) {
-      if (response.success) {
-        that.didFindRecord(store, type, response.json)
-      }
-    })
-	},
+// 	find:  function(store, type, id) {
+//     debugger;
+// 		var that = this;
+//     var root = this.convertToRoot(type);
+//     socket.emit('find', root, id, function(response) {
+//       if (response.success) {
+//         that.didFindRecord(store, type, response.json)
+//       }
+//     })
+// 	},
 
-  didFindRecord: function(store, type, json) {
-    var root = this.convertToRoot(type);
+//   didFindRecord: function(store, type, json) {
+//     var root = this.convertToRoot(type);
 
-    //this.sideload(store, type, json, root);
-    store.load(type, json[root]);
-  },
+//     //this.sideload(store, type, json, root);
+//     store.load(type, json[root]);
+//   },
 
-	findAll: function(store, type) {
-		var that = this;
-    var root = this.convertToRoot(type);
+// 	findAll: function(store, type) {
+// 		var that = this;
+//     var root = this.convertToRoot(type);
 
-		socket.emit('findAll', root, function(response) {
-			if (response.success) {
-				that.didFindAll(store, type, response.json)
-			}
-		})
-	},
+// 		socket.emit('findAll', root, function(response) {
+// 			if (response.success) {
+// 				that.didFindAll(store, type, response.json)
+// 			}
+// 		})
+// 	},
 
-	didFindAll: function(store, type, json) {
-		var root = this.convertToRoot(type);
+// 	didFindAll: function(store, type, json) {
+// 		var root = this.convertToRoot(type);
 
-	  //this.sideload(store, type, json, root);
-	  store.loadMany(type, json[root]);
+// 	  //this.sideload(store, type, json, root);
+// 	  store.loadMany(type, json[root]);
 
-	  store.didUpdateAll(type);
-	},
+// 	  store.didUpdateAll(type);
+// 	},
 
-	findQuery:  function(store, type, query, modelArray) {
-		// Implement this function
-	},
+// 	findQuery:  function(store, type, query, modelArray) {
+// 		// Implement this function
+// 	},
 
-	createRecord:  function(store, type, record) {
-		var that = this;
-    var data = this.toJSON(record, {associations: true});
-    var root = this.convertToRoot(type);
+// 	createRecord:  function(store, type, record) {
+// 		var that = this;
+//     var data = this.toJSON(record, {associations: true});
+//     var root = this.convertToRoot(type);
 
-    console.log(data);
+//     console.log(data);
 
-		socket.emit('createRecord', root, data, function(response) {
-			if (response.success) {
-				that.didCreateRecord(store, type, record, response.json);
-			}
-		})
-	},
+// 		socket.emit('createRecord', root, data, function(response) {
+// 			if (response.success) {
+// 				that.didCreateRecord(store, type, record, response.json);
+// 			}
+// 		})
+// 	},
 
-	didCreateRecord: function(store, type, record, json) {
-		var root = this.convertToRoot(type);
+// 	didCreateRecord: function(store, type, record, json) {
+// 		var root = this.convertToRoot(type);
 
-    	//this.sideload(store, type, data, root);
+//     	//this.sideload(store, type, data, root);
 
-      // Updates in-flight status of the parent object 
-      record.eachAssociation(function(name, meta) {
-          if (meta.kind === 'belongsTo') {
-            store.didUpdateRelationship(record, name);
-          }
-        });
+//       // Updates in-flight status of the parent object 
+//       record.eachAssociation(function(name, meta) {
+//           if (meta.kind === 'belongsTo') {
+//             store.didUpdateRelationship(record, name);
+//           }
+//         });
 
-    	store.didSaveRecord(record, json[root]);
-  	},
+//     	store.didSaveRecord(record, json[root]);
+//   	},
 
-  sideload: function(store, type, json, root) {
-    var sideloadedType, mappings, loaded = {};
+//   sideload: function(store, type, json, root) {
+//     var sideloadedType, mappings, loaded = {};
 
-    loaded[root] = true;
+//     loaded[root] = true;
 
-    for (var prop in json) {
-		if (!json.hasOwnProperty(prop)) { continue; }
-		if (prop === root) { continue; }
-		if (prop === get(this, 'meta')) { continue; }
+//     for (var prop in json) {
+// 		if (!json.hasOwnProperty(prop)) { continue; }
+// 		if (prop === root) { continue; }
+// 		if (prop === get(this, 'meta')) { continue; }
 
-		sideloadedType = type.typeForAssociation(prop);
+// 		sideloadedType = type.typeForAssociation(prop);
 
-		if (!sideloadedType) {
-			mappings = get(this, 'mappings');
-			Ember.assert("Your server returned a hash with the key " + prop + " but you have no mappings", !!mappings);
+// 		if (!sideloadedType) {
+// 			mappings = get(this, 'mappings');
+// 			Ember.assert("Your server returned a hash with the key " + prop + " but you have no mappings", !!mappings);
 
-			sideloadedType = get(mappings, prop);
+// 			sideloadedType = get(mappings, prop);
 
-			if (typeof sideloadedType === 'string') {
-			  sideloadedType = get(window, sideloadedType);
-			}
+// 			if (typeof sideloadedType === 'string') {
+// 			  sideloadedType = get(window, sideloadedType);
+// 			}
 
-        	Ember.assert("Your server returned a hash with the key " + prop + " but you have no mapping for it", !!sideloadedType);
-    	}
+//         	Ember.assert("Your server returned a hash with the key " + prop + " but you have no mapping for it", !!sideloadedType);
+//     	}
 
-    	this.sideloadAssociations(store, sideloadedType, json, prop, loaded);
-    }
-	},
+//     	this.sideloadAssociations(store, sideloadedType, json, prop, loaded);
+//     }
+// 	},
 
-	sideloadAssociations: function(store, type, json, prop, loaded) {
-		loaded[prop] = true;
+// 	sideloadAssociations: function(store, type, json, prop, loaded) {
+// 		loaded[prop] = true;
 
-		get(type, 'associationsByName').forEach(function(key, meta) {
-	  		key = meta.key || key;
-	  		if (meta.kind === 'belongsTo') {
-	    		key = this.pluralize(key);
-	  		}
-	  		if (json[key] && !loaded[key]) {
-	    		this.sideloadAssociations(store, meta.type, json, key, loaded);
-	  		}
-		}, this);
+// 		get(type, 'associationsByName').forEach(function(key, meta) {
+// 	  		key = meta.key || key;
+// 	  		if (meta.kind === 'belongsTo') {
+// 	    		key = this.pluralize(key);
+// 	  		}
+// 	  		if (json[key] && !loaded[key]) {
+// 	    		this.sideloadAssociations(store, meta.type, json, key, loaded);
+// 	  		}
+// 		}, this);
 
-		this.loadValue(store, type, json[prop]);
-	},
+// 		this.loadValue(store, type, json[prop]);
+// 	},
 
-	loadValue: function(store, type, value) {
-		if (value instanceof Array) {
-			store.loadMany(type, value);
-		} else {
-			store.load(type, value);
-		}
-	},
+// 	loadValue: function(store, type, value) {
+// 		if (value instanceof Array) {
+// 			store.loadMany(type, value);
+// 		} else {
+// 			store.load(type, value);
+// 		}
+// 	},
 
-	updateRecord:  function(store, type, record) {
-		var that = this;
-    var data = this.toJSON(record, {associations: true});
-		var root = this.convertToRoot(type);
+// 	updateRecord:  function(store, type, record) {
+// 		var that = this;
+//     var data = this.toJSON(record, {associations: true});
+// 		var root = this.convertToRoot(type);
 
-		socket.emit('updateRecord', root, data, function(response) {
-			// On success...
-			if (response.success) {
-				that.didUpdateRecord(store, type, record, response.data)
-			}
-		})
-	},
+// 		socket.emit('updateRecord', root, data, function(response) {
+// 			// On success...
+// 			if (response.success) {
+// 				that.didUpdateRecord(store, type, record, response.data)
+// 			}
+// 		})
+// 	},
 
-  didUpdateRecord: function(store, type, record, json) {
-    var root = this.convertToRoot(type);
+//   didUpdateRecord: function(store, type, record, json) {
+//     var root = this.convertToRoot(type);
 
-    //this.sideload(store, type, json, root);
-    store.didSaveRecord(record, json && json[root]);
-  },
+//     //this.sideload(store, type, json, root);
+//     store.didSaveRecord(record, json && json[root]);
+//   },
 
-  convertToRoot:  function(type) {
-    var root =  type.toString().replace('App.', '').toLowerCase().capitalize();
-    return root;
-  }
+//   convertToRoot:  function(type) {
+//     var root =  type.toString().replace('App.', '').toLowerCase().capitalize();
+//     return root;
+//   }
 
-});
+// });
 
 
 // Mapping
 
-App.SOCKETadapter.map("App.Team", { primaryKey: "_id" });
-App.SOCKETadapter.map("App.User", { primaryKey: "_id" });
+DS.RESTAdapter.map("App.Team", { primaryKey: "_id" });
+DS.RESTAdapter.map("App.User", { primaryKey: "_id" });
 
 
 // Store
 
 App.store = DS.Store.create({
 	revision: 7,
-	adapter: App.SOCKETadapter.create({
+	adapter: DS.RESTAdapter.create({
+    namespace: 'api/v1',
 		mappings: {
           team: 'App.Team',
           user: 'App.User'
