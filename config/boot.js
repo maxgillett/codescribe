@@ -32,7 +32,7 @@ module.exports = function(options){
       switch (key) {
         case 'show':
           method = 'get';
-          path = '/' + name + '/:id';
+          path = '/' + name + 's/:id';
           break;
         case 'list':
           method = 'get';
@@ -44,11 +44,15 @@ module.exports = function(options){
           break;
         case 'update':
           method = 'put';
-          path = '/' + name + '/:id';
+          path = '/' + name + 's/:id';
           break;
         case 'create':
           method = 'post';
-          path = '/' + name;
+          path = '/' + name + 's';
+          break;
+        case 'query':
+          method = 'get';
+          path = '/' + name + 's' + '?l';
           break;
         case 'index':
           method = 'get';
@@ -59,9 +63,14 @@ module.exports = function(options){
       }
 
       path = prefix + path;
-      app[method](path, obj[key]);
+      app[method](path, ensureAuthenticated, obj[key]);
       verbose && console.log('     %s %s -> %s', method.toUpperCase(), path, key);
     }
 
   });
 };
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/')
+}

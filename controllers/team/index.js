@@ -1,6 +1,6 @@
 var db = require('../../config/db');
 
-exports.show = function(req, res, next){
+exports.show = function(req, res, next) {
   var uid = req.session.passport.user
     , id = req.param("id");
 
@@ -11,7 +11,7 @@ exports.show = function(req, res, next){
       });
 };
 
-exports.index = function(req, res, next){
+exports.index = function(req, res, next) {
   var uid = req.session.passport.user;
 
 	db.team.find({})
@@ -19,6 +19,26 @@ exports.index = function(req, res, next){
 	  .exec(function(err, teams) {
 	    res.json({ teams: teams });
 	  });
-
-
 };
+
+exports.create = function(req, res, next) {
+  var uid = req.session.passport.user
+    , team = req.body.team;
+
+  team.members = [uid];
+  console.log(team);
+
+  db.team.create(team, function(err, data) {
+    res.json({ team: data });
+  });
+};
+
+exports.update = function(req, res, next) {
+  var uid = req.session.passport.user
+    , id = req.param("id")
+    , team = req.body.team;
+
+  db.team.findByIdAndUpdate(id, team, function(err, data) {
+    res.json({ team: data });
+  })
+}

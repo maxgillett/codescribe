@@ -204,7 +204,21 @@ listing {
   font-size: 16px;
   padding: 6px;
 }
+#name input {
+  background: none;
+  width: 175px;
+  outline: none;
+  font-family: 'Ubuntu', sans-serif;
+  color: #fff;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border: none;
+  font-size: 16px;
+  padding: 0 6px;
+  margin: 0;
+}
 #name span {
+  cursor: pointer;
   position: relative;
   left: 6px;
 }
@@ -214,7 +228,11 @@ listing {
 .team:nth-of-type(2) #name {
   background: #64728a;
 }
+.team:nth-of-type(3) #name {
+  background: #737373;
+}
 .team #name .room {
+  cursor: pointer;
   position: absolute;
   right: 10px;
   top: 6px;
@@ -227,10 +245,14 @@ listing {
 .team:nth-of-type(2) #name .room {
   background: #8b96ab;
 }
+.team:nth-of-type(3) #name .room {
+  background: #999;
+}
 #members {
   padding: 10px 10px 0px 10px;
 }
 #members .memb {
+  cursor: pointer;
   position: relative;
   font-family: 'Open Sans', sans-serif;
   font-weight: 600;
@@ -276,9 +298,9 @@ listing {
 }
 #members .memb.open {
   font-size: 12px;
-  padding: 5px;
+  padding-left: 5px;
   height: 30px;
-  width: 206px;
+  width: 100%;
   background: #dadada;
   color: #9a9a9a;
   border: 2px solid #b3b3b3;

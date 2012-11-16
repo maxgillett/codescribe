@@ -24,7 +24,7 @@ html
 
 		script(type='text/x-handlebars', 'data-template-name'='dashboard')	
 			#navbox.
-				<div class="create" {{ action addTeam target="controller" }}>
+				<div class="create" {{ action "addTeam" target="controller" }}>
 					<div class="add"></div>
 					<span>Add team</span>
 				</div>
@@ -33,24 +33,18 @@ html
 			#team-container.
 				{{#each team in content}}
 					{{#with team}}
-						{{#view App.SingleTeamView}}
+						{{#view App.SingleTeamView teamBinding="team"}}
 							<div id="name">
-								<span>{{ name }}</span>
+								{{#if renaming}}
+									{{view App.NameTextareaView valueBinding="name" teamBinding="team"}}
+								{{else}}
+									<span {{action "rename" target="view" on="doubleClick"}} >{{ name }}</span>
+								{{/if}}
 								<div class="room"></div>
 							</div>
 							<div id="members">
 								{{#each member in members}}
-									{{#with member}}	
-										<div class="memb">
-											{{#if online}}
-												<div class="online"></div>
-											{{else}}
-												<div class="offline"></div>
-											{{/if}}
-											<span>{{ name }}</span>
-											<div class="pref"></div>
-										</div>
-									{{/with}}
+									{{view App.SingleMemberView memberBinding="member"}}
 								{{/each}}
 								{{#each member in pending}}
 									{{#with member}}	
@@ -67,9 +61,20 @@ html
 						{{/view}}
 					{{/with}}
 				{{/each}}
-	
 
 
+		script(type='text/x-handlebars', 'data-template-name'='singlemember').
+			{{#with member}}
+				<div class="memb">
+					{{#if online}}
+						<div class="online"></div>
+					{{else}}
+						<div class="offline"></div>
+					{{/if}}
+					<span>{{ name }}</span>
+					<div class="pref"></div>
+				</div>
+			{{/with}}
 
 		script(src='./javascripts/application.js')
 
