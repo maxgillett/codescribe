@@ -33,9 +33,12 @@ App = Em.Application.create({
       App.store.commit();
     },
     addMember: function(team, val) {
+      var transaction = App.store.transaction();
       var pending = team.get("pending");
-      var pendingUser = App.store.findQuery(App.User, val) || val;
+      var pendingUser = App.store.find(App.User, val) || val;
       pending.pushObject(pendingUser);
+      transaction.add(pending);
+      transaction.commit();
     }
   }),
 
@@ -120,6 +123,7 @@ App = Em.Application.create({
 	Router: Ember.Router.extend({
 		location: 'history',
 		enableLogging: true,
+    goToRoom: Ember.Router.transitionTo('rooms.room', 5),
 
     root:  Ember.Route.extend({
     	dashboard:  Ember.Route.extend({
@@ -143,6 +147,15 @@ App = Em.Application.create({
           },
           deserialize: function(router, params) {
             return App.store.find(App.Team, params.id);
+          }
+        })
+      }),
+      rooms:  Em.Route.extend({
+        route: '/rooms',
+        room:  Em.Route.extend({
+          route: '/:id',
+          connectOutlets: function(router, team) {
+
           }
         })
       })
