@@ -309,3 +309,57 @@ listing {
   color: #8c8c8c;
   padding-left: 18px;
 }
+#left-pane {
+  position: absolute;
+  width: 225px;
+  top: 33px;
+  bottom: 0;
+  background: #d6d6d6;
+  border-left: 2px solid #5e5e5e;
+}
+#center-pane {
+  position: absolute;
+  top: 33px;
+  left: 225px;
+  right: 252px;
+  bottom: 0;
+  background: #042029;
+}
+#right-pane {
+  position: absolute;
+  top: 33px;
+  right: 0;
+  bottom: 0;
+  width: 250px;
+  background: #d6d6d6;
+  border-left: 2px solid #5e5e5e;
+}
+#right-pane .team {
+  position: relative;
+  width: 250px;
+  height: 175px;
+  background: #fff;
+  border-bottom: 2px solid #ccc;
+}
+#right-pane .team .name {
+  background: #808080;
+  padding: 5px;
+}
+#right-pane .chat {
+  position: absolute;
+  width: 250px;
+  top: 177px;
+  bottom: 120px;
+  background: #f2f2f2;
+  border-bottom: 2px solid #ccc;
+}
+#right-pane .box {
+  position: absolute;
+  height: 120px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  outline: none;
+  border: none;
+}

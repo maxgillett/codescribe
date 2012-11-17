@@ -2,21 +2,21 @@
 <html>
   <head>
     <title>Codescribe</title>
-    <link rel="stylesheet" href="./stylesheets/codescribe.css"/>
-    <link rel="stylesheet" href="./javascripts/vendor/codemirror/lib/codemirror.css"/>
+    <link rel="stylesheet" href="/stylesheets/codescribe.css"/>
+    <link rel="stylesheet" href="/javascripts/vendor/codemirror/lib/codemirror.css"/>
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Ubuntu:700"/>
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400,600"/>
-    <script src="./javascripts/vendor/jquery-1.8.2.min.js"></script>
-    <script src="./javascripts/vendor/underscore.js"></script>
-    <script src="./socket.io/socket.io.js"></script>
-    <script src="./javascripts/vendor/handlebars-1.0.rc.1.js"></script>
-    <script src="./javascripts/vendor/moment.min.js"></script>
-    <script src="./javascripts/vendor/ember.js"></script>
-    <script src="./javascripts/vendor/ember-data.js"></script>
-    <script src="./javascripts/vendor/codemirror/lib/codemirror.js"></script>
-    <script src="./javascripts/vendor/codemirror/lib/util/runmode.js"></script>
-    <script src="./javascripts/vendor/codemirror/mode/javascript/javascript.js"></script>
-    <script src="./javascripts/vendor/jquery.dotdotdot-1.5.1.js">	</script>
+    <script src="/javascripts/vendor/jquery-1.8.2.min.js"></script>
+    <script src="/javascripts/vendor/underscore.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/javascripts/vendor/handlebars-1.0.rc.1.js"></script>
+    <script src="/javascripts/vendor/moment.min.js"></script>
+    <script src="/javascripts/vendor/ember.js"></script>
+    <script src="/javascripts/vendor/ember-data.js"></script>
+    <script src="/javascripts/vendor/codemirror/lib/codemirror.js"></script>
+    <script src="/javascripts/vendor/codemirror/lib/util/runmode.js"></script>
+    <script src="/javascripts/vendor/codemirror/mode/javascript/javascript.js"></script>
+    <script src="/javascripts/vendor/jquery.dotdotdot-1.5.1.js">	</script>
   </head>
   <body>
     <script type="text/x-handlebars" data-template-name="application">
@@ -41,7 +41,7 @@
             {{else}}
              <span {{action "rename" target="view" on="doubleClick"}} >{{ name }}</span>
             {{/if}}
-            <div class="room"></div>
+            <div class="room" {{action goToRoom team}} ></div>
            </div>
            <div id="members">
             {{#each member in members}}
@@ -79,7 +79,20 @@
        </div>
       {{/with}}
       
+      
     </script>
-    <script src="./javascripts/application.js"></script>
+    <script type="text/x-handlebars" data-template-name="room">
+      <div id="left-pane"></div>
+      <div id="center-pane"></div>
+      <div id="right-pane">
+        <div class="team">
+          {{#with content}}
+           <div id="name"> {{name}} </div>
+          {{/with}}
+        </div>
+        <div class="chat"></div>{{view App.ChatTextareaView placeholder="Send a message"}}
+      </div>
+    </script>
+    <script src="/javascripts/application.js"></script>
   </body>
 </html>

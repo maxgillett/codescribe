@@ -24,6 +24,9 @@ team_bg = #cdcdcd
 	height: header_height
 	background: #2f2f2f
 
+
+// Dashboard
+
 #navbox
 	position: absolute
 	top: header_height + 20px
@@ -174,3 +177,62 @@ team_bg = #cdcdcd
 	color: lighten(black, 55)
 	padding-left: 18px
 
+
+// Room 
+
+left-pane-width = 225px
+right-pane-width = 250px
+
+#left-pane
+	position: absolute
+	width: left-pane-width
+	top: header_height
+	bottom: 0
+	background: #d6d6d6
+	border-left: 2px solid #5e5e5e
+
+#center-pane
+	position: absolute
+	top: header_height
+	left: left-pane-width
+	right: right-pane-width + 2px
+	bottom: 0
+	background: #042029
+
+#right-pane
+	position: absolute
+	top: header_height
+	right: 0
+	bottom: 0
+	width: right-pane-width
+	background: #d6d6d6
+	border-left: 2px solid #5e5e5e
+
+#right-pane .team
+	position: relative
+	width: right-pane-width
+	height: 175px
+	background: white
+	border-bottom: 2px solid lighten(black, 80)
+
+#right-pane .team .name
+	background: darken(white, 50)
+	padding: 5px
+
+#right-pane .chat
+	position: absolute
+	width: right-pane-width
+	top: 175px + 2px
+	bottom: 120px
+	background: darken(white, 5)
+	border-bottom: 2px solid lighten(black, 80)
+
+#right-pane .box
+	position: absolute
+	height: 120px
+	bottom: 0
+	left: 0
+	right: 0
+	background: white
+	outline: none
+	border: none

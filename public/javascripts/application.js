@@ -33,12 +33,11 @@ App = Em.Application.create({
       App.store.commit();
     },
     addMember: function(team, val) {
-      var transaction = App.store.transaction();
-      var pending = team.get("pending");
-      var pendingUser = App.store.find(App.User, val) || val;
-      pending.pushObject(pendingUser);
-      transaction.add(pending);
-      transaction.commit();
+      var pendingUser = App.store.find(App.User, "50a1db927b1b2c8d71000001");
+      console.log(pendingUser);
+      var t = App.store.find(App.Team, "50a7fa5bd2445f66e9000004");
+      t.get("pending").pushObject(pendingUser);
+      //App.store.commit();
     }
   }),
 
@@ -120,11 +119,30 @@ App = Em.Application.create({
     }
   }),
 
+  RoomController:  Em.Controller.extend({
+  }),
+
+  RoomView:  Em.View.extend({
+    templateName:  'room',
+  }),
+
+  ChatTextareaView:  Em.TextArea.extend({
+    classNames: ["box"],
+    keyDown: function(e) {
+      if (e.which == 13) {
+        e.preventDefault();
+        var val = this.get("value");
+      }
+    }
+  }),
+
 	Router: Ember.Router.extend({
 		location: 'history',
 		enableLogging: true,
-    goToRoom: Ember.Router.transitionTo('rooms.room', 5),
-
+    goToRoom: function(router, view) {
+      var team = view.context;
+      App.router.transitionTo('root.rooms.room', team);
+    },
     root:  Ember.Route.extend({
     	dashboard:  Ember.Route.extend({
     		route:  '/',
@@ -155,7 +173,10 @@ App = Em.Application.create({
         room:  Em.Route.extend({
           route: '/:id',
           connectOutlets: function(router, team) {
-
+            router.get("applicationController").connectOutlet('content', 'room', team);
+          },
+          deserialize: function(router, params) {
+            return App.store.find(App.Team, params.id);
           }
         })
       })
@@ -183,7 +204,7 @@ DS.RESTAdapter.map("App.User", { primaryKey: "_id" });
 // Store
 
 App.store = DS.Store.create({
-	revision: 7,
+	revision: 8,
 	adapter: DS.RESTAdapter.create({
     namespace: 'api/v1',
 		mappings: {
@@ -198,7 +219,10 @@ App.store = DS.Store.create({
 
 App.Team = DS.Model.extend({
   name: DS.attr('string'),
-  slots: DS.attr('string'),
+  slots: DS.attr('string')
+});
+
+App.Team.reopen({
   members: DS.hasMany('App.User'),
   pending: DS.hasMany('App.User'),
   openSlots: function() {
@@ -210,7 +234,7 @@ App.Team = DS.Model.extend({
   nameChanged: Ember.observer(function() {
     App.store.commit();
   }, 'name')
-});
+})
 
 App.User = DS.Model.extend({
   uid: DS.attr('string'),

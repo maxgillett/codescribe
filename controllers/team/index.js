@@ -26,10 +26,9 @@ exports.create = function(req, res, next) {
     , team = req.body.team;
 
   team.members = [uid];
-  console.log(team);
 
-  db.team.create(team, function(err, data) {
-    res.json({ team: data });
+  db.team.create(team, function(err, team) {
+    res.json({ team: team });
   });
 };
 

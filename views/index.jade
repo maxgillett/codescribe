@@ -2,21 +2,21 @@ doctype strict 5
 html
 	head
 		title Codescribe
-		link(rel='stylesheet', href='./stylesheets/codescribe.css')
-		link(rel='stylesheet', href='./javascripts/vendor/codemirror/lib/codemirror.css')
+		link(rel='stylesheet', href='/stylesheets/codescribe.css')
+		link(rel='stylesheet', href='/javascripts/vendor/codemirror/lib/codemirror.css')
 		link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Ubuntu:700')
 		link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Open+Sans:400,600')
-		script(src='./javascripts/vendor/jquery-1.8.2.min.js')
-		script(src='./javascripts/vendor/underscore.js')
-		script(src='./socket.io/socket.io.js')
-		script(src='./javascripts/vendor/handlebars-1.0.rc.1.js')
-		script(src='./javascripts/vendor/moment.min.js')
-		script(src='./javascripts/vendor/ember.js')
-		script(src='./javascripts/vendor/ember-data.js')
-		script(src='./javascripts/vendor/codemirror/lib/codemirror.js')
-		script(src='./javascripts/vendor/codemirror/lib/util/runmode.js')
-		script(src='./javascripts/vendor/codemirror/mode/javascript/javascript.js')
-		script(src='./javascripts/vendor/jquery.dotdotdot-1.5.1.js')	
+		script(src='/javascripts/vendor/jquery-1.8.2.min.js')
+		script(src='/javascripts/vendor/underscore.js')
+		script(src='/socket.io/socket.io.js')
+		script(src='/javascripts/vendor/handlebars-1.0.rc.1.js')
+		script(src='/javascripts/vendor/moment.min.js')
+		script(src='/javascripts/vendor/ember.js')
+		script(src='/javascripts/vendor/ember-data.js')
+		script(src='/javascripts/vendor/codemirror/lib/codemirror.js')
+		script(src='/javascripts/vendor/codemirror/lib/util/runmode.js')
+		script(src='/javascripts/vendor/codemirror/mode/javascript/javascript.js')
+		script(src='/javascripts/vendor/jquery.dotdotdot-1.5.1.js')	
 	body
 		script(type='text/x-handlebars', 'data-template-name'='application')
 			#header
@@ -40,7 +40,7 @@ html
 								{{else}}
 									<span {{action "rename" target="view" on="doubleClick"}} >{{ name }}</span>
 								{{/if}}
-								<div class="room"></div>
+								<div class="room" {{action goToRoom team}} ></div>
 							</div>
 							<div id="members">
 								{{#each member in members}}
@@ -76,5 +76,17 @@ html
 				</div>
 			{{/with}}
 
-		script(src='./javascripts/application.js')
+
+		script(type='text/x-handlebars', 'data-template-name'='room')
+			#left-pane
+			#center-pane
+			#right-pane
+				.team.
+					{{#with content}}
+						<div id="name"> {{name}} </div>
+					{{/with}}
+				.chat
+				{{view App.ChatTextareaView placeholder="Send a message"}}
+
+		script(src='/javascripts/application.js')
 

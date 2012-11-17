@@ -11,6 +11,10 @@ app.get('/teams', ensureAuthenticated, function(req, res){
 	res.render('index');
 });
 
+app.get('/rooms/:id', ensureAuthenticated, function(req, res){
+	res.render('index');
+});
+
 app.get('/auth/github', passport.authenticate('github'));
 
 app.get('/auth/github/callback', 
