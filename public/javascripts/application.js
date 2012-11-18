@@ -33,11 +33,16 @@ App = Em.Application.create({
       App.store.commit();
     },
     addMember: function(team, val) {
-      var pendingUser = App.store.find(App.User, "50a1db927b1b2c8d71000001");
-      console.log(pendingUser);
-      var t = App.store.find(App.Team, "50a7fa5bd2445f66e9000004");
-      t.get("pending").pushObject(pendingUser);
-      //App.store.commit();
+      var query = App.store.find(App.User, { email: val });
+      var exec = {
+        trigger: function() {
+          var cid = query.get("content").get("firstObject");
+          var pendingUser = App.store.findByClientId(App.User, cid);
+          team.get("pending").pushObject(pendingUser);
+          App.store.commit();
+        }
+      }
+      query.addObserver('isLoaded', exec, 'trigger');
     }
   }),
 
@@ -219,10 +224,7 @@ App.store = DS.Store.create({
 
 App.Team = DS.Model.extend({
   name: DS.attr('string'),
-  slots: DS.attr('string')
-});
-
-App.Team.reopen({
+  slots: DS.attr('string'),
   members: DS.hasMany('App.User'),
   pending: DS.hasMany('App.User'),
   openSlots: function() {
@@ -234,7 +236,7 @@ App.Team.reopen({
   nameChanged: Ember.observer(function() {
     App.store.commit();
   }, 'name')
-})
+});
 
 App.User = DS.Model.extend({
   uid: DS.attr('string'),
@@ -242,7 +244,9 @@ App.User = DS.Model.extend({
   avatar: DS.attr('string'),
   username: DS.attr('string'),
   email: DS.attr('string'),
-  online: DS.attr('string')
+  online: DS.attr('string'),
+  teams: DS.belongsTo('App.Team'),
+  invitations: DS.belongsTo('App.Team')
 });
 
 App.initialize();

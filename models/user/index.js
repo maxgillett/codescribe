@@ -1,11 +1,12 @@
 var mongoose = require('mongoose');
 
 var schema = exports.schema = new mongoose.Schema({
-  uid: { type: String, unique: true },
+  uid: String,
   name: String,
   username: String,
   avatar: String,
-  email: String,
+  email: { type: String, unique: true },
+  teams: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Team' }]
 });
 
 schema.statics.findOrCreate = function(data, done) {
@@ -19,3 +20,4 @@ schema.statics.findOrCreate = function(data, done) {
     done(null, user);
   });
 }
+

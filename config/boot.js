@@ -50,10 +50,6 @@ module.exports = function(options){
           method = 'post';
           path = '/' + name + 's';
           break;
-        case 'query':
-          method = 'get';
-          path = '/' + name + 's' + '?l';
-          break;
         case 'index':
           method = 'get';
           path = '/' + name + 's';

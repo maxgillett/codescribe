@@ -72,7 +72,6 @@ passport.use(new GitHubStrategy({
     callbackURL: config.auth.github.callbackURL
   },
   function(accessToken, refreshToken, profile, done) {
-    console.log(profile);
     process.nextTick(function () {
       var data = {
         uid: profile.id,
