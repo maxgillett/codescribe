@@ -15,11 +15,21 @@ exports.show = function(req, res, next) {
 exports.index = function(req, res, next) {
   var uid = req.session.passport.user;
 
-	db.team.find({})
+  // Refactor into async control structure
+	db.team.find({}, '-pending -members')
     .where('members').in([uid])
 	  .exec(function(err, teams) {
-	    res.json({ teams: teams });
+      db.memberUser.find({})
+        .exec(function(err, memberUsers) {
+          db.pendingUser.find({})
+            .exec(function(err, pendingUsers) {
+              res.json({ memberUsers: memberUsers, pendingUsers: pendingUsers, teams: teams });
+            });
+        });
+	    //res.json({ teams: teams });
 	  });
+
+
 };
 
 exports.create = function(req, res, next) {
@@ -45,7 +55,7 @@ exports.create = function(req, res, next) {
           });
       }
   ], function (err, team, memberUser) {
-     res.json({ team: team});  
+     res.json({ team: team, memberUser: memberUser });  
   });
 
 };

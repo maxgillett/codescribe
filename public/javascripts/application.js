@@ -29,7 +29,15 @@ App = Em.Application.create({
 
   DashboardController:  Em.ArrayController.extend({
     addTeam: function() {
-      App.store.createRecord(App.Team,  { name: "Untitled", slots: 5});
+      var team = App.store.createRecord(App.Team,  { name: "Untitled", slots: 5});
+      var exec = {
+        trigger: function() {
+          console.log(team);
+          team.notifyPropertyChange('members');
+        }
+      };
+
+      team.addObserver('memberUsers.length', exec, 'trigger');
       App.store.commit();
     },
     addMember: function(team, val) {
@@ -37,14 +45,18 @@ App = Em.Application.create({
       var exec = {
         trigger: function() {
           var pendingUser = query.get("firstObject");
-          //team.get("pending").pushObject(pendingUser);
 
           pending_user = team.get('pendingUsers').createRecord({
             user: pendingUser
           });
 
           pendingUser.get('pendingUsers').pushObject(pending_user);
+          
           App.store.commit();
+
+          team.notifyPropertyChange('pending');
+
+
         }
       }
       query.addObserver('isLoaded', exec, 'trigger');
@@ -185,9 +197,7 @@ App = Em.Application.create({
         invites: Em.Route.extend({
           route: '/invites',
           connectOutlets: function(router, context) {
-            var user = App.store.find(App.User, '50a9961d2615720000000001');
-            var invites = user.get("invitations");
-            console.log(invites);
+            var invites = App.store.findAll(App.Invite);
             router.get('applicationController').connectOutlet('content', 'invitations', invites);
           }
         }),
@@ -230,11 +240,47 @@ socket.on('connect', function () {
 
 // Mapping
 
-DS.RESTAdapter.map("App.Team", { primaryKey: "_id", memberUsers: { key: 'members_users' } });
-DS.RESTAdapter.map("App.User", { primaryKey: "_id" });
-DS.RESTAdapter.map("App.MemberUser", { primaryKey: "_id" });
-DS.RESTAdapter.map("App.PendingUser", { primaryKey: "_id" });
+DS.RESTAdapter.map("App.Team", { 
+  primaryKey: "_id", 
+  memberUsers: { 
+    key: 'members_users' 
+  },
+  pendingUsers: {
+    key: 'pending_users'
+  } 
+});
 
+DS.RESTAdapter.map("App.User", {
+  primaryKey: "_id", 
+  memberUsers: { 
+    key: 'members_users' 
+  },
+  pendingUsers: {
+    key: 'pending_users'
+  } 
+});
+
+DS.RESTAdapter.map("App.MemberUser", {
+  primaryKey: "_id", 
+  team: {key: 'team'}, 
+  user: {key: 'user'} 
+});
+
+DS.RESTAdapter.map("App.PendingUser", { 
+  primaryKey: "_id", 
+  team: {key: 'team'}, 
+  user: {key: 'user'} 
+});
+
+DS.RESTAdapter.map("App.Invite", {
+  primaryKey: "_id", 
+  memberUsers: { 
+    key: 'members_users' 
+  },
+  pendingUsers: {
+    key: 'pending_users'
+  } 
+});
 
 // Store
 
@@ -246,7 +292,8 @@ App.store = DS.Store.create({
           team: 'App.Team',
           user: 'App.User',
           memberUser: 'App.MemberUser',
-          pendingUser: 'App.PendingUser'
+          pendingUser: 'App.PendingUser',
+          invite: 'App.Invite'
     	}
 	})
 });
@@ -277,19 +324,21 @@ App.Team = DS.Model.extend({
   members: function() {
     var that = this;
     var teamUsers = App.store.filter(App.MemberUser, function(hash) {
-      if (hash.get('team').get("id") == that.id) { return true; }
+      if (hash.get('team').id == that.id) { return true; }
     });
 
     return teamUsers.mapProperty('user');
-  }.property('membersUsers'),
+  }.property('memberUsers'),
 
   pending: function() {
     var that = this;
+    console.log("running function");
     var teamUsers = App.store.filter(App.PendingUser, function(hash) {
-      if (hash.get('team').get("id") == that.id) { return true; }
+      if (hash.get('team').id == that.id) { return true; }
     });
 
-    return teamUsers.mapProperty('user');
+    // This is a hack. Why am I having to call "uniq" here"
+    return teamUsers.mapProperty('user').uniq();
   }.property('pendingUsers'),
 
   openSlots: function() {
@@ -312,8 +361,8 @@ App.User = DS.Model.extend({
   email: DS.attr('string'),
   online: DS.attr('string'),
 
-  memberUsers: DS.hasMany('App.MemberUser', {key: 'members_users'}),
-  pendingUsers: DS.hasMany('App.PendingUser', {key: 'pending_users'}),
+  memberUsers: DS.hasMany('App.MemberUser'),
+  pendingUsers: DS.hasMany('App.PendingUser'),
 
   teams: function() {
     var that = this;
@@ -326,13 +375,17 @@ App.User = DS.Model.extend({
 
   pending: function() {
     var that = this;
-    var teamUsers = App.store.filter(Person, function(hash) {
-      if (hash.get('team').get("id") == that.id) { return true; }
+    var teamUsers = App.store.filter(App.PendingUser, function(hash) {
+      if (hash.get('user').get("id") == that.id) { return true; }
     });
 
     return teamUsers.mapProperty('team');
   }.property('pendingUsers'),
 
+});
+
+App.Invite = DS.Model.extend({
+  team: DS.attr('string')
 });
 
 
