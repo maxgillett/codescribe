@@ -35,7 +35,7 @@ team_bg = #cdcdcd
 	border-right: 1px solid darken(white, 20)
 	//background: darken(white, 5)
 
-#navbox .create
+#navbox .team-button
 	cursor: pointer
 	position: relative
 	left: 25px
@@ -44,7 +44,7 @@ team_bg = #cdcdcd
 	background: darken(white, 5)
 	border: 1px solid darken(white, 9)
 
-#navbox .create .add 
+#navbox .team-button .add 
 	position: relative
 	top: 10px
 	left: 18px
@@ -52,7 +52,7 @@ team_bg = #cdcdcd
 	height: 25px
 	image: '/images/plus.png' 25px 25px
 
-#navbox .create span
+#navbox .team-button span
 	position: relative
 	display: block
 	top: 23px
@@ -64,14 +64,78 @@ team_bg = #cdcdcd
 	padding: 4px 1px 1px 1px
 	//background: darken(white, 13)
 
+#navbox .return-team-button
+	cursor: pointer
+	position: relative
+	left: 25px
+	width: 60px
+	height: 70px
+	background: darken(white, 5)
+	border: 1px solid darken(white, 9)
+
+#navbox .return-team-button .add 
+	position: relative
+	top: 10px
+	left: 18px
+	width: 25px
+	height: 25px
+
+#navbox .return-team-button span
+	position: relative
+	text-align: center
+	display: block
+	top: 23px
+	width: 43px
+	left: 8px
+	font-size: 10px
+	color: darken(white, 45)
+	border-top: 1px solid darken(white, 15)
+	padding: 4px 1px 1px 1px
+
+#navbox .invitation
+	cursor: pointer
+	position: relative
+	left: 25px
+	top: 20px
+	width: 60px
+	height: 70px
+	background: darken(white, 5)
+	border: 1px solid darken(white, 9)
+
+#navbox .invitation .view 
+	position: relative
+	top: 5px
+	text-align: center
+	width: 62px
+	height: 25px
+	color: lighten(black, 30)
+	font-size: 32px
+	font-weight: bold
+
+#navbox .invitation span
+	position: relative
+	display: block
+	width: 43px
+	top: 23px
+	left: 8px
+	font-size: 10px
+	color: darken(white, 45)
+	border-top: 1px solid darken(white, 15)
+	padding: 4px 1px 1px 1px
+
 #team-container
 	position: absolute
+	top: header_height
+	bottom: 0
+	right: right-pane-width
+	overflow: auto
 	left: 125px
 	padding: 20px
 
 .team
 	float: left
 	margin-right: 20px
+	margin-bottom: 20px
 	width: 225px
 	background: team_bg
 
@@ -99,13 +163,13 @@ team_bg = #cdcdcd
 	position: relative
 	left: 6px
 
-.team:first-of-type #name
+.team:nth-of-type(3n - 2) #name
 	background: #8a646c
 
-.team:nth-of-type(2) #name
+.team:nth-of-type(3n - 1) #name
 	background: #64728a
 
-.team:nth-of-type(3) #name
+.team:nth-of-type(3n) #name
 	background: lighten(black, 45)
 
 .team #name .room
@@ -116,13 +180,13 @@ team_bg = #cdcdcd
 	width: 25px
 	height: 18px	
 
-.team:first-of-type #name .room
+.team:nth-of-type(3n - 2) #name .room
 	background: lighten(#a67983, 7)
 
-.team:nth-of-type(2) #name .room
+.team:nth-of-type(3n - 1) #name .room
 	background: lighten(#64728a, 14)
 
-.team:nth-of-type(3) #name .room
+.team:nth-of-type(3n) #name .room
 	background: lighten(black, 60)
 
 #members

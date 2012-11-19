@@ -46,36 +46,42 @@ exports.index = function(req, res, next){
 };
 
 exports.update = function(req, res, next){
-  var uid = req.session.passport.user
-    , user_data = req.body.user
-    , user_id = req.param("id")
-    , team_id = user_data.teams_id;
+  var uid = req.session.passport.user 
+    , user_data = req.body.user 
+    , user_id = req.param("id") 
+    , team_id = user_data.teams_id;  
 
   if (team_id) {
-    async.parallel([
-      function(callback){
+    async.waterfall([
+      function(callback) {
+        db.pendingUser.create({ user: user_id, team: team_id }, function(err, pendingUser) {
+          callback(null, pendingUser)
+        });
+      },      
+      function(pendingUser, callback){
+        db.user.findById(user_id)
+          .exec(function(err, user) {
+            user.pending_users.push(pendingUser._id);
+            user.pending.push(team_id);
+            user.save(function(err, user) {
+              callback(null, pendingUser, user)
+            });
+          });
+      },
+      function(pendingUser, user, callback){
         db.team.findById(team_id)
           .where('members').in([uid])
           .exec(function(err, team) {
+            team.pending_users.push(pendingUser._id);
             team.pending.push(user_id);
             team.save(function(err, team) {
-              callback(null, team)
-            });
-          });
-      },
-      function(callback){
-        db.user.findById(user_id)
-          .exec(function(err, user) {
-            user.teams.push(team_id);
-            user.save(function(err, user) {
               callback(null, user)
             });
           });
-      },
+      }
     ],
-    function(err, results){
-        res.json({ user: results[1] });
+    function(err, user){
+        res.json({ user: user });
     });
   }
-
 }

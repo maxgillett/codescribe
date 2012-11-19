@@ -7,7 +7,7 @@ app.get('/', function(req, res){
 	res.render('index');
 });
 
-app.get('/teams', ensureAuthenticated, function(req, res){
+app.get('/teams*', ensureAuthenticated, function(req, res){
 	res.render('index');
 });
 

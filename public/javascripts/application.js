@@ -36,9 +36,14 @@ App = Em.Application.create({
       var query = App.store.find(App.User, { email: val });
       var exec = {
         trigger: function() {
-          var cid = query.get("content").get("firstObject");
-          var pendingUser = App.store.findByClientId(App.User, cid);
-          team.get("pending").pushObject(pendingUser);
+          var pendingUser = query.get("firstObject");
+          //team.get("pending").pushObject(pendingUser);
+
+          pending_user = team.get('pendingUsers').createRecord({
+            user: pendingUser
+          });
+
+          pendingUser.get('pendingUsers').pushObject(pending_user);
           App.store.commit();
         }
       }
@@ -124,6 +129,14 @@ App = Em.Application.create({
     }
   }),
 
+  InvitationsController:  Em.Controller.extend({
+
+  }),
+
+  InvitationsView:  Em.View.extend({
+    templateName: 'invitations'
+  }),
+
   RoomController:  Em.Controller.extend({
   }),
 
@@ -156,11 +169,26 @@ App = Em.Application.create({
       }),
       teams:  Em.Route.extend({
         route: '/teams',
+        viewTeams: function(router, view) {
+          App.router.transitionTo('index');
+        },
+        viewInvites: function(router, view) {
+          App.router.transitionTo('invites');
+        },
         index: Em.Route.extend({
           route: '/',
           connectOutlets: function(router, context) {
             var teams = App.store.findAll(App.Team);
             router.get('applicationController').connectOutlet('content', 'dashboard', teams);
+          }
+        }),
+        invites: Em.Route.extend({
+          route: '/invites',
+          connectOutlets: function(router, context) {
+            var user = App.store.find(App.User, '50a9961d2615720000000001');
+            var invites = user.get("invitations");
+            console.log(invites);
+            router.get('applicationController').connectOutlet('content', 'invitations', invites);
           }
         }),
         team: Em.Route.extend({
@@ -202,8 +230,10 @@ socket.on('connect', function () {
 
 // Mapping
 
-DS.RESTAdapter.map("App.Team", { primaryKey: "_id" });
+DS.RESTAdapter.map("App.Team", { primaryKey: "_id", memberUsers: { key: 'members_users' } });
 DS.RESTAdapter.map("App.User", { primaryKey: "_id" });
+DS.RESTAdapter.map("App.MemberUser", { primaryKey: "_id" });
+DS.RESTAdapter.map("App.PendingUser", { primaryKey: "_id" });
 
 
 // Store
@@ -214,9 +244,24 @@ App.store = DS.Store.create({
     namespace: 'api/v1',
 		mappings: {
           team: 'App.Team',
-          user: 'App.User'
+          user: 'App.User',
+          memberUser: 'App.MemberUser',
+          pendingUser: 'App.PendingUser'
     	}
 	})
+});
+
+
+// Join table models
+
+App.MemberUser = DS.Model.extend({
+  team: DS.belongsTo('App.Team'),
+  user: DS.belongsTo('App.User')
+});
+
+App.PendingUser = DS.Model.extend({
+  team: DS.belongsTo('App.Team'),
+  user: DS.belongsTo('App.User')
 });
 
 
@@ -225,14 +270,35 @@ App.store = DS.Store.create({
 App.Team = DS.Model.extend({
   name: DS.attr('string'),
   slots: DS.attr('string'),
-  members: DS.hasMany('App.User'),
-  pending: DS.hasMany('App.User'),
+
+  memberUsers: DS.hasMany('App.MemberUser'),
+  pendingUsers: DS.hasMany('App.PendingUser'),
+
+  members: function() {
+    var that = this;
+    var teamUsers = App.store.filter(App.MemberUser, function(hash) {
+      if (hash.get('team').get("id") == that.id) { return true; }
+    });
+
+    return teamUsers.mapProperty('user');
+  }.property('membersUsers'),
+
+  pending: function() {
+    var that = this;
+    var teamUsers = App.store.filter(App.PendingUser, function(hash) {
+      if (hash.get('team').get("id") == that.id) { return true; }
+    });
+
+    return teamUsers.mapProperty('user');
+  }.property('pendingUsers'),
+
   openSlots: function() {
     var len = this.get("slots") 
               - this.get("members").get("length")
               - this.get("pending").get("length");
     return new Array(len)
   }.property('members.length', 'pending.length'),
+
   nameChanged: Ember.observer(function() {
     App.store.commit();
   }, 'name')
@@ -245,8 +311,29 @@ App.User = DS.Model.extend({
   username: DS.attr('string'),
   email: DS.attr('string'),
   online: DS.attr('string'),
-  teams: DS.belongsTo('App.Team'),
-  invitations: DS.belongsTo('App.Team')
+
+  memberUsers: DS.hasMany('App.MemberUser', {key: 'members_users'}),
+  pendingUsers: DS.hasMany('App.PendingUser', {key: 'pending_users'}),
+
+  teams: function() {
+    var that = this;
+    var teamUsers = App.store.filter(App.MemberUser, function(hash) {
+      if (hash.get('user').get("id") == that.id) { return true; }
+    });
+
+    return teamUsers.mapProperty('team');
+  }.property('membersUsers'),
+
+  pending: function() {
+    var that = this;
+    var teamUsers = App.store.filter(Person, function(hash) {
+      if (hash.get('team').get("id") == that.id) { return true; }
+    });
+
+    return teamUsers.mapProperty('team');
+  }.property('pendingUsers'),
+
 });
+
 
 App.initialize();

@@ -150,7 +150,7 @@ listing {
   bottom: 20px;
   border-right: 1px solid #ccc;
 }
-#navbox .create {
+#navbox .team-button {
   cursor: pointer;
   position: relative;
   left: 25px;
@@ -159,7 +159,7 @@ listing {
   background: #f2f2f2;
   border: 1px solid #e8e8e8;
 }
-#navbox .create .add {
+#navbox .team-button .add {
   position: relative;
   top: 10px;
   left: 18px;
@@ -168,14 +168,14 @@ listing {
   background-image: url("/images/plus.png");
 }
 @media all and (-webkit-min-device-pixel-ratio: 1.5) {
-  #navbox .create .add {
+  #navbox .team-button .add {
     background-image: url("/images/plus@2x.png");
     -webkit-background-size: 25px 25px;
     -moz-background-size: 25px 25px;
     background-size: 25px 25px;
   }
 }
-#navbox .create span {
+#navbox .team-button span {
   position: relative;
   display: block;
   top: 23px;
@@ -186,14 +186,78 @@ listing {
   border-top: 1px solid #d9d9d9;
   padding: 4px 1px 1px 1px;
 }
+#navbox .return-team-button {
+  cursor: pointer;
+  position: relative;
+  left: 25px;
+  width: 60px;
+  height: 70px;
+  background: #f2f2f2;
+  border: 1px solid #e8e8e8;
+}
+#navbox .return-team-button .add {
+  position: relative;
+  top: 10px;
+  left: 18px;
+  width: 25px;
+  height: 25px;
+}
+#navbox .return-team-button span {
+  position: relative;
+  text-align: center;
+  display: block;
+  top: 23px;
+  width: 43px;
+  left: 8px;
+  font-size: 10px;
+  color: #8c8c8c;
+  border-top: 1px solid #d9d9d9;
+  padding: 4px 1px 1px 1px;
+}
+#navbox .invitation {
+  cursor: pointer;
+  position: relative;
+  left: 25px;
+  top: 20px;
+  width: 60px;
+  height: 70px;
+  background: #f2f2f2;
+  border: 1px solid #e8e8e8;
+}
+#navbox .invitation .view {
+  position: relative;
+  top: 5px;
+  text-align: center;
+  width: 62px;
+  height: 25px;
+  color: #4d4d4d;
+  font-size: 32px;
+  font-weight: bold;
+}
+#navbox .invitation span {
+  position: relative;
+  display: block;
+  width: 43px;
+  top: 23px;
+  left: 8px;
+  font-size: 10px;
+  color: #8c8c8c;
+  border-top: 1px solid #d9d9d9;
+  padding: 4px 1px 1px 1px;
+}
 #team-container {
   position: absolute;
+  top: 33px;
+  bottom: 0;
+  right: right-pane-width;
+  overflow: auto;
   left: 125px;
   padding: 20px;
 }
 .team {
   float: left;
   margin-right: 20px;
+  margin-bottom: 20px;
   width: 225px;
   background: #cdcdcd;
 }
@@ -222,13 +286,13 @@ listing {
   position: relative;
   left: 6px;
 }
-.team:first-of-type #name {
+.team:nth-of-type(3n - 2) #name {
   background: #8a646c;
 }
-.team:nth-of-type(2) #name {
+.team:nth-of-type(3n - 1) #name {
   background: #64728a;
 }
-.team:nth-of-type(3) #name {
+.team:nth-of-type(3n) #name {
   background: #737373;
 }
 .team #name .room {
@@ -239,13 +303,13 @@ listing {
   width: 25px;
   height: 18px;
 }
-.team:first-of-type #name .room {
+.team:nth-of-type(3n - 2) #name .room {
   background: #b48e97;
 }
-.team:nth-of-type(2) #name .room {
+.team:nth-of-type(3n - 1) #name .room {
   background: #8b96ab;
 }
-.team:nth-of-type(3) #name .room {
+.team:nth-of-type(3n) #name .room {
   background: #999;
 }
 #members {

@@ -24,10 +24,15 @@
     </script>
     <script type="text/x-handlebars" data-template-name="dashboard">	
       <div id="navbox">
-        <div class="create" {{ action "addTeam" target="controller" }}>
+        <div class="team-button" {{ action "addTeam" target="controller" }}>
          <div class="add"></div>
          <span>Add team</span>
         </div>
+        <div class="invitation" {{ action "viewInvites" }}>
+         <div class="view">1</div>
+         <span>Invitations</span>
+        </div>
+        
         
         
       </div>
@@ -80,6 +85,23 @@
       {{/with}}
       
       
+    </script>
+    <script type="text/x-handlebars" data-template-name="invitations">	
+      <div id="navbox">
+        <div class="return-team-button" {{ action "viewTeams" }}>
+         <div class="add"></div>
+         <span>Teams</span>
+        </div>
+        
+        
+      </div>
+      <div id="team-container">
+        {{#each invite in content}}
+         {{invite.name}}
+        {{/each}}
+        
+        
+      </div>
     </script>
     <script type="text/x-handlebars" data-template-name="room">
       <div id="left-pane"></div>
