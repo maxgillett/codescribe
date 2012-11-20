@@ -27,12 +27,12 @@ App = Em.Application.create({
   	templateName: 'application'
 	}),
 
-  DashboardController:  Em.ArrayController.extend({
+  DashboardController:  Em.Controller.extend({
+
     addTeam: function() {
       var team = App.store.createRecord(App.Team,  { name: "Untitled", slots: 5});
       var exec = {
         trigger: function() {
-          console.log(team);
           team.notifyPropertyChange('members');
         }
       };
@@ -69,6 +69,17 @@ App = Em.Application.create({
 
   SingleMemberView: Ember.View.extend({
     templateName: 'singlemember',
+    mouseEnter: function(e) {
+      this.$('.pref').show();
+    },
+    mouseLeave: function(e) {
+      this.$('.pref').hide();
+    }
+  }),
+
+
+  PendingSingleMemberView: Ember.View.extend({
+    templateName: 'pendingsinglemember',
     mouseEnter: function(e) {
       this.$('.pref').show();
     },
@@ -149,6 +160,17 @@ App = Em.Application.create({
     templateName: 'invitations'
   }),
 
+  SingleInvitationView: Ember.View.extend({
+    templateName: 'singleinvitation',
+    classNames: ["invitation"],
+    mouseEnter: function(e) {
+      this.$('.pref').show();
+    },
+    mouseLeave: function(e) {
+      this.$('.pref').hide();
+    }
+  }),
+
   RoomController:  Em.Controller.extend({
   }),
 
@@ -191,7 +213,8 @@ App = Em.Application.create({
           route: '/',
           connectOutlets: function(router, context) {
             var teams = App.store.findAll(App.Team);
-            router.get('applicationController').connectOutlet('content', 'dashboard', teams);
+            var invites = App.store.findAll(App.Invite);
+            router.get('applicationController').connectOutlet('content', 'dashboard', {teams: teams, invites: invites});
           }
         }),
         invites: Em.Route.extend({
@@ -332,7 +355,6 @@ App.Team = DS.Model.extend({
 
   pending: function() {
     var that = this;
-    console.log("running function");
     var teamUsers = App.store.filter(App.PendingUser, function(hash) {
       if (hash.get('team').id == that.id) { return true; }
     });
@@ -385,7 +407,7 @@ App.User = DS.Model.extend({
 });
 
 App.Invite = DS.Model.extend({
-  team: DS.attr('string')
+  name: DS.attr('string')
 });
 
 

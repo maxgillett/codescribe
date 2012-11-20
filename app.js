@@ -16,6 +16,10 @@ var express = require('express')
   , _ = require('underscore')
   , sioCookieParser = express.cookieParser("secretstring");
 
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 // Setup Redis and session store
 
 var redisClient = exports.redisClient = redis.createClient(),
@@ -31,8 +35,12 @@ var db = require('./config/db')
 app.configure(function() {
   this.set('view engine', 'jade');
   this.set('views', "views");
+  var paths = [
+      __dirname + '/assets/stylesheets'
+  ];
   function compile(str, path) {
     return stylus(str)
+      .set('paths', paths)
       .use(nib())
       .import('nib')
       .import(__dirname + '/assets/stylesheets/reset');

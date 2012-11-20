@@ -121,6 +121,330 @@ table {
   border-collapse: collapse;
   border-spacing: 0;
 }
+#navbox {
+  position: absolute;
+  top: 53px;
+  width: 115px;
+  bottom: 20px;
+  border-right: 1px solid #ccc;
+}
+#navbox .team-button {
+  cursor: pointer;
+  position: relative;
+  left: 25px;
+  width: 60px;
+  height: 70px;
+  background: #f2f2f2;
+  border: 1px solid #e8e8e8;
+}
+#navbox .team-button span {
+  position: relative;
+  text-align: center;
+  display: block;
+  top: 23px;
+  width: 43px;
+  left: 8px;
+  font-size: 10px;
+  color: #8c8c8c;
+  border-top: 1px solid #d9d9d9;
+  padding: 4px 1px 1px 1px;
+}
+#navbox .team-button .add {
+  position: relative;
+  top: 10px;
+  left: 18px;
+  width: 25px;
+  height: 25px;
+  background-image: url("/images/plus.png");
+}
+@media all and (-webkit-min-device-pixel-ratio: 1.5) {
+  #navbox .team-button .add {
+    background-image: url("/images/plus@2x.png");
+    -webkit-background-size: 25px 25px;
+    -moz-background-size: 25px 25px;
+    background-size: 25px 25px;
+  }
+}
+#navbox .return-team-button {
+  cursor: pointer;
+  position: relative;
+  left: 25px;
+  width: 60px;
+  height: 70px;
+  background: #f2f2f2;
+  border: 1px solid #e8e8e8;
+}
+#navbox .return-team-button span {
+  position: relative;
+  text-align: center;
+  display: block;
+  top: 23px;
+  width: 43px;
+  left: 8px;
+  font-size: 10px;
+  color: #8c8c8c;
+  border-top: 1px solid #d9d9d9;
+  padding: 4px 1px 1px 1px;
+}
+#navbox .return-team-button .add {
+  position: relative;
+  top: 10px;
+  left: 18px;
+  width: 25px;
+  height: 25px;
+}
+#navbox .invitation-button {
+  cursor: pointer;
+  position: relative;
+  left: 25px;
+  width: 60px;
+  height: 70px;
+  background: #f2f2f2;
+  border: 1px solid #e8e8e8;
+  top: 20px;
+}
+#navbox .invitation-button span {
+  position: relative;
+  text-align: center;
+  display: block;
+  top: 23px;
+  width: 43px;
+  left: 8px;
+  font-size: 10px;
+  color: #8c8c8c;
+  border-top: 1px solid #d9d9d9;
+  padding: 4px 1px 1px 1px;
+}
+#navbox .invitation-button .add {
+  position: relative;
+  top: 10px;
+  left: 18px;
+  width: 25px;
+  height: 25px;
+}
+#navbox .invitation-button .view {
+  position: relative;
+  top: 5px;
+  text-align: center;
+  width: 62px;
+  height: 25px;
+  color: #4d4d4d;
+  font-size: 32px;
+  font-weight: bold;
+}
+#team-container {
+  position: absolute;
+  top: 33px;
+  bottom: 0;
+  right: right-pane-width;
+  overflow: auto;
+  left: 125px;
+  padding: 20px;
+}
+#team-container .team {
+  float: left;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  width: 225px;
+  background: #cdcdcd;
+}
+#team-container .team:nth-of-type(3n - 2) #name {
+  background: #8a646c;
+}
+#team-container .team:nth-of-type(3n - 2) #name .room {
+  background: #b48e97;
+}
+#team-container .team:nth-of-type(3n - 1) #name {
+  background: #64728a;
+}
+#team-container .team:nth-of-type(3n - 1) #name .room {
+  background: #8b96ab;
+}
+#team-container .team:nth-of-type(3n) #name {
+  background: #737373;
+}
+#team-container .team:nth-of-type(3n) #name .room {
+  background: #999;
+}
+#team-container .team #name {
+  position: relative;
+  font-family: 'Ubuntu', sans-serif;
+  color: #fff;
+  font-size: 16px;
+  padding: 6px;
+}
+#team-container .team #name input {
+  background: none;
+  width: 175px;
+  outline: none;
+  font-family: 'Ubuntu', sans-serif;
+  color: #fff;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border: none;
+  font-size: 16px;
+  padding: 0 6px;
+  margin: 0;
+}
+#team-container .team #name span {
+  cursor: pointer;
+  position: relative;
+  left: 6px;
+}
+#team-container .team #name .room {
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 6px;
+  width: 25px;
+  height: 18px;
+}
+#team-container #members {
+  padding: 10px 10px 0px 10px;
+}
+#team-container #members .memb {
+  cursor: pointer;
+  position: relative;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+  background: #e7e7e7;
+  margin-bottom: 10px;
+}
+#team-container #members .memb .offline,
+#team-container #members .memb .online {
+  display: inline-block;
+  position: relative;
+  top: -2px;
+  left: 5px;
+  margin-right: 4px;
+  width: 5px;
+  height: 5px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background: #b8b8b8;
+}
+#team-container #members .memb .online {
+  background: #3a9849;
+}
+#team-container #members .memb span {
+  display: inline-block;
+  padding: 6px;
+  width: 160px;
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#team-container #members .memb .pref {
+  display: none;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  background-image: url("/images/edit-img.png");
+}
+@media all and (-webkit-min-device-pixel-ratio: 1.5) {
+  #team-container #members .memb .pref {
+    background-image: url("/images/edit-img@2x.png");
+    -webkit-background-size: 20px 20px;
+    -moz-background-size: 20px 20px;
+    background-size: 20px 20px;
+  }
+}
+#team-container #members .open {
+  font-size: 12px;
+  padding-left: 5px;
+  height: 30px;
+  width: 100%;
+  background: #dadada;
+  color: #9a9a9a;
+  border: 2px solid #b3b3b3;
+}
+#team-container #members .pending span {
+  color: #8c8c8c;
+  padding-left: 18px;
+}
+#invite-container {
+  position: absolute;
+  top: 33px;
+  bottom: 0;
+  right: right-pane-width;
+  overflow: auto;
+  left: 125px;
+  padding: 20px;
+}
+#invite-container .invitation {
+  float: left;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  width: 225px;
+  background: #cdcdcd;
+}
+#invite-container .invitation .name {
+  position: relative;
+  font-family: 'Ubuntu', sans-serif;
+  color: #fff;
+  font-size: 16px;
+  padding: 6px 6px 6px 10px;
+  background: #737373;
+}
+#invite-container .invitation .invited-by {
+  padding: 6px 6px 6px 10px;
+  background: #b3b3b3;
+  color: #4d4d4d;
+}
+#invite-container .invitation .invited-by span {
+  color: #4d4d4d;
+}
+#invite-container .invitation .permissions {
+  margin: 10px;
+  padding: 6px 6px 6px 10px;
+  font-family: 'Open Sans', sans-serif;
+  color: #262626;
+  font-size: 13px;
+  background: #e7e7e7;
+}
+#invite-container .invitation .permissions span {
+  font-weight: bold;
+}
+#invite-container .invitation .permissions ul {
+  padding-left: 25px;
+  margin-bottom: 5px;
+}
+#invite-container .invitation .permissions li {
+  list-style-type: circle;
+  text-indent: -4px;
+}
+#invite-container .invitation .decision {
+  margin: 10px;
+  height: 25px;
+}
+#invite-container .invitation .decision .accept {
+  cursor: pointer;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 5px;
+  text-align: center;
+  float: left;
+  margin-right: 10px;
+  width: 98px;
+  height: 25px;
+  background: #81b078;
+}
+#invite-container .invitation .decision .decline {
+  cursor: pointer;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 5px;
+  text-align: center;
+  float: left;
+  width: 97px;
+  height: 25px;
+  background: #a48484;
+}
 body {
   font: 13px 'helvetica neue', helvetica, arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -142,236 +466,6 @@ listing {
   width: 100%;
   height: 33px;
   background: #2f2f2f;
-}
-#navbox {
-  position: absolute;
-  top: 53px;
-  width: 115px;
-  bottom: 20px;
-  border-right: 1px solid #ccc;
-}
-#navbox .team-button {
-  cursor: pointer;
-  position: relative;
-  left: 25px;
-  width: 60px;
-  height: 70px;
-  background: #f2f2f2;
-  border: 1px solid #e8e8e8;
-}
-#navbox .team-button .add {
-  position: relative;
-  top: 10px;
-  left: 18px;
-  width: 25px;
-  height: 25px;
-  background-image: url("/images/plus.png");
-}
-@media all and (-webkit-min-device-pixel-ratio: 1.5) {
-  #navbox .team-button .add {
-    background-image: url("/images/plus@2x.png");
-    -webkit-background-size: 25px 25px;
-    -moz-background-size: 25px 25px;
-    background-size: 25px 25px;
-  }
-}
-#navbox .team-button span {
-  position: relative;
-  display: block;
-  top: 23px;
-  width: 43px;
-  left: 8px;
-  font-size: 10px;
-  color: #8c8c8c;
-  border-top: 1px solid #d9d9d9;
-  padding: 4px 1px 1px 1px;
-}
-#navbox .return-team-button {
-  cursor: pointer;
-  position: relative;
-  left: 25px;
-  width: 60px;
-  height: 70px;
-  background: #f2f2f2;
-  border: 1px solid #e8e8e8;
-}
-#navbox .return-team-button .add {
-  position: relative;
-  top: 10px;
-  left: 18px;
-  width: 25px;
-  height: 25px;
-}
-#navbox .return-team-button span {
-  position: relative;
-  text-align: center;
-  display: block;
-  top: 23px;
-  width: 43px;
-  left: 8px;
-  font-size: 10px;
-  color: #8c8c8c;
-  border-top: 1px solid #d9d9d9;
-  padding: 4px 1px 1px 1px;
-}
-#navbox .invitation {
-  cursor: pointer;
-  position: relative;
-  left: 25px;
-  top: 20px;
-  width: 60px;
-  height: 70px;
-  background: #f2f2f2;
-  border: 1px solid #e8e8e8;
-}
-#navbox .invitation .view {
-  position: relative;
-  top: 5px;
-  text-align: center;
-  width: 62px;
-  height: 25px;
-  color: #4d4d4d;
-  font-size: 32px;
-  font-weight: bold;
-}
-#navbox .invitation span {
-  position: relative;
-  display: block;
-  width: 43px;
-  top: 23px;
-  left: 8px;
-  font-size: 10px;
-  color: #8c8c8c;
-  border-top: 1px solid #d9d9d9;
-  padding: 4px 1px 1px 1px;
-}
-#team-container {
-  position: absolute;
-  top: 33px;
-  bottom: 0;
-  right: right-pane-width;
-  overflow: auto;
-  left: 125px;
-  padding: 20px;
-}
-.team {
-  float: left;
-  margin-right: 20px;
-  margin-bottom: 20px;
-  width: 225px;
-  background: #cdcdcd;
-}
-#name {
-  position: relative;
-  font-family: 'Ubuntu', sans-serif;
-  color: #fff;
-  font-size: 16px;
-  padding: 6px;
-}
-#name input {
-  background: none;
-  width: 175px;
-  outline: none;
-  font-family: 'Ubuntu', sans-serif;
-  color: #fff;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  border: none;
-  font-size: 16px;
-  padding: 0 6px;
-  margin: 0;
-}
-#name span {
-  cursor: pointer;
-  position: relative;
-  left: 6px;
-}
-.team:nth-of-type(3n - 2) #name {
-  background: #8a646c;
-}
-.team:nth-of-type(3n - 1) #name {
-  background: #64728a;
-}
-.team:nth-of-type(3n) #name {
-  background: #737373;
-}
-.team #name .room {
-  cursor: pointer;
-  position: absolute;
-  right: 10px;
-  top: 6px;
-  width: 25px;
-  height: 18px;
-}
-.team:nth-of-type(3n - 2) #name .room {
-  background: #b48e97;
-}
-.team:nth-of-type(3n - 1) #name .room {
-  background: #8b96ab;
-}
-.team:nth-of-type(3n) #name .room {
-  background: #999;
-}
-#members {
-  padding: 10px 10px 0px 10px;
-}
-#members .memb {
-  cursor: pointer;
-  position: relative;
-  font-family: 'Open Sans', sans-serif;
-  font-weight: 600;
-  background: #e7e7e7;
-  margin-bottom: 10px;
-}
-#members .memb .offline,
-#members .memb .online {
-  display: inline-block;
-  position: relative;
-  top: -2px;
-  left: 5px;
-  margin-right: 4px;
-  width: 5px;
-  height: 5px;
-  -webkit-border-radius: 3px;
-  border-radius: 3px;
-  background: #b8b8b8;
-}
-#members .memb .online {
-  background: #3a9849;
-}
-#members .memb span {
-  display: inline-block;
-  padding: 6px;
-}
-#members .memb .pref {
-  display: none;
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 20px;
-  height: 20px;
-  background-image: url("/images/edit-img.png");
-}
-@media all and (-webkit-min-device-pixel-ratio: 1.5) {
-  #members .memb .pref {
-    background-image: url("/images/edit-img@2x.png");
-    -webkit-background-size: 20px 20px;
-    -moz-background-size: 20px 20px;
-    background-size: 20px 20px;
-  }
-}
-#members .memb.open {
-  font-size: 12px;
-  padding-left: 5px;
-  height: 30px;
-  width: 100%;
-  background: #dadada;
-  color: #9a9a9a;
-  border: 2px solid #b3b3b3;
-}
-#members .memb.pending span {
-  color: #8c8c8c;
-  padding-left: 18px;
 }
 #left-pane {
   position: absolute;
@@ -405,9 +499,14 @@ listing {
   background: #fff;
   border-bottom: 2px solid #ccc;
 }
-#right-pane .team .name {
+#right-pane .team #name {
   background: #808080;
   padding: 5px;
+  font-family: 'Ubuntu', sans-serif;
+  background: #8a646c;
+  color: #fff;
+  font-size: 16px;
+  padding: 6px;
 }
 #right-pane .chat {
   position: absolute;

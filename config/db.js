@@ -15,5 +15,5 @@ fs.readdirSync(__dirname + '/../models').forEach(function(name) {
     , name = obj.name || name
     , schema = obj.schema;
   
-  exports[name] = db.model(name, schema);
+  exports[name] = db.model(name.capitalize(), schema);
 })

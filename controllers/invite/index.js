@@ -1,4 +1,5 @@
 var db = require('../../config/db')
+  , _ = require('underscore')
   , async = require('async');
 
 // Invites are a layer that sit on top of pendingUsers. 
@@ -13,11 +14,37 @@ exports.show = function(req, res, next) {
 exports.index = function(req, res, next) {
   var uid = req.session.passport.user;
 
+
+  async.waterfall([
+    function(callback){
+        callback(null, 'one', 'two');
+    },
+    function(arg1, arg2, callback){
+        callback(null, 'three');
+    },
+    function(arg1, callback){
+        // arg1 now equals 'three'
+        callback(null, 'done');
+    }
+  ], function (err, result) {
+     // result now equals 'done'    
+  });
+
   db.pendingUser.find({'user': uid })
-    .exec(function(err, invites) {
-      // Reshape this into an invite (an object
-      // with only a team name and pendingUser 
-      // id) using async waterfall  
+    .populate('team', 'name')
+    .exec(function(err, pendingUsers) {
+      var names, ids, invites;
+      
+      names = _.pluck(pendingUsers, 'team');
+      names = _.pluck(names, 'name');
+      ids = _.pluck(pendingUsers, '_id');
+
+      invites = _.zip(names, ids);
+
+      invites = _.map(invites, function(arr) {
+        return _.object(['name', '_id'], arr);
+      });
+
       res.json({ invites: invites }); 
     });
 

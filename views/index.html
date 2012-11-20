@@ -28,7 +28,7 @@
          <div class="add"></div>
          <span>Add team</span>
         </div>
-        <div class="invitation" {{ action "viewInvites" }}>
+        <div class="invitation-button" {{ action "viewInvites" }}>
          <div class="view">1</div>
          <span>Invitations</span>
         </div>
@@ -97,7 +97,7 @@
       </div>
       <div id="team-container">
         {{#each invite in content}}
-         {{invite.team}}
+         {{invite.name}}
         {{/each}}
         
         

@@ -1,3 +1,12 @@
+@import '/mixins/buttons'
+
+header_height = 33px
+off_black = #2f2f2f
+team_bg = #cdcdcd
+
+@import '/sections/dashboard'
+@import '/sections/invitations'
+
 body
 	font: 13px 'helvetica neue', helvetica, arial, sans-serif
 	-webkit-font-smoothing: antialiased
@@ -14,232 +23,10 @@ pre, xmp, plaintext, listing {
 }
 
 
-header_height = 33px
-off_black = #2f2f2f
-team_bg = #cdcdcd
-
-
 #header
 	width: 100%
 	height: header_height
 	background: #2f2f2f
-
-
-// Dashboard
-
-#navbox
-	position: absolute
-	top: header_height + 20px
-	width: 115px
-	bottom: 20px
-	border-right: 1px solid darken(white, 20)
-	//background: darken(white, 5)
-
-#navbox .team-button
-	cursor: pointer
-	position: relative
-	left: 25px
-	width: 60px
-	height: 70px
-	background: darken(white, 5)
-	border: 1px solid darken(white, 9)
-
-#navbox .team-button .add 
-	position: relative
-	top: 10px
-	left: 18px
-	width: 25px
-	height: 25px
-	image: '/images/plus.png' 25px 25px
-
-#navbox .team-button span
-	position: relative
-	display: block
-	top: 23px
-	width: 43px
-	left: 8px
-	font-size: 10px
-	color: darken(white, 45)
-	border-top: 1px solid darken(white, 15)
-	padding: 4px 1px 1px 1px
-	//background: darken(white, 13)
-
-#navbox .return-team-button
-	cursor: pointer
-	position: relative
-	left: 25px
-	width: 60px
-	height: 70px
-	background: darken(white, 5)
-	border: 1px solid darken(white, 9)
-
-#navbox .return-team-button .add 
-	position: relative
-	top: 10px
-	left: 18px
-	width: 25px
-	height: 25px
-
-#navbox .return-team-button span
-	position: relative
-	text-align: center
-	display: block
-	top: 23px
-	width: 43px
-	left: 8px
-	font-size: 10px
-	color: darken(white, 45)
-	border-top: 1px solid darken(white, 15)
-	padding: 4px 1px 1px 1px
-
-#navbox .invitation
-	cursor: pointer
-	position: relative
-	left: 25px
-	top: 20px
-	width: 60px
-	height: 70px
-	background: darken(white, 5)
-	border: 1px solid darken(white, 9)
-
-#navbox .invitation .view 
-	position: relative
-	top: 5px
-	text-align: center
-	width: 62px
-	height: 25px
-	color: lighten(black, 30)
-	font-size: 32px
-	font-weight: bold
-
-#navbox .invitation span
-	position: relative
-	display: block
-	width: 43px
-	top: 23px
-	left: 8px
-	font-size: 10px
-	color: darken(white, 45)
-	border-top: 1px solid darken(white, 15)
-	padding: 4px 1px 1px 1px
-
-#team-container
-	position: absolute
-	top: header_height
-	bottom: 0
-	right: right-pane-width
-	overflow: auto
-	left: 125px
-	padding: 20px
-
-.team
-	float: left
-	margin-right: 20px
-	margin-bottom: 20px
-	width: 225px
-	background: team_bg
-
-#name 
-	position: relative
-	font-family: 'Ubuntu', sans-serif;
-	color: white
-	font-size: 16px
-	padding: 6px
-
-#name input
-	background: none
-	width: 175px
-	outline: none
-	font-family: 'Ubuntu', sans-serif;
-	color: white
-	box-shadow: none
-	border: none
-	font-size: 16px
-	padding: 0 6px
-	margin: 0	
-
-#name span
-	cursor: pointer
-	position: relative
-	left: 6px
-
-.team:nth-of-type(3n - 2) #name
-	background: #8a646c
-
-.team:nth-of-type(3n - 1) #name
-	background: #64728a
-
-.team:nth-of-type(3n) #name
-	background: lighten(black, 45)
-
-.team #name .room
-	cursor: pointer
-	position: absolute
-	right: 10px
-	top: 6px
-	width: 25px
-	height: 18px	
-
-.team:nth-of-type(3n - 2) #name .room
-	background: lighten(#a67983, 7)
-
-.team:nth-of-type(3n - 1) #name .room
-	background: lighten(#64728a, 14)
-
-.team:nth-of-type(3n) #name .room
-	background: lighten(black, 60)
-
-#members
-	padding: 10px 10px 0px 10px
-
-#members .memb 
-	cursor: pointer
-	position: relative
-	font-family: 'Open Sans', sans-serif
-	font-weight: 600
-	background: lighten(team_bg, 10)
-	margin-bottom: 10px
-
-#members .memb .offline, #members .memb .online
-	display: inline-block
-	position: relative
-	top: -2px
-	left: 5px
-	margin-right: 4px
-	width: 5px
-	height: 5px
-	border-radius: 3px
-	background: darken(white, 28)
-
-#members .memb .online
-	background: #3a9849
-
-
-#members .memb span
-	display: inline-block
-	padding: 6px
-
-#members .memb .pref
-	display: none
-	position: absolute
-	top: 4px
-	right: 4px
-	width: 20px
-	height: 20px
-	image: '/images/edit-img.png' 20px 20px
-
-#members .memb.open
-	font-size: 12px
-	padding-left: 5px
-	height: 30px
-	width: 100%
-	background: lighten(team_bg, 5)
-	color: lighten(team_bg, -20)
-	border: 2px solid lighten(team_bg, -10)
-
-#members .memb.pending span
-	color: lighten(black, 55)
-	padding-left: 18px
 
 
 // Room 
@@ -272,31 +59,36 @@ right-pane-width = 250px
 	background: #d6d6d6
 	border-left: 2px solid #5e5e5e
 
-#right-pane .team
-	position: relative
-	width: right-pane-width
-	height: 175px
-	background: white
-	border-bottom: 2px solid lighten(black, 80)
+	.team
+		position: relative
+		width: right-pane-width
+		height: 175px
+		background: white
+		border-bottom: 2px solid lighten(black, 80)
 
-#right-pane .team .name
-	background: darken(white, 50)
-	padding: 5px
+		#name
+			background: darken(white, 50)
+			padding: 5px     
+			font-family: 'Ubuntu', sans-serif
+			background: #8a646c
+			color: white
+			font-size: 16px
+			padding: 6px
 
-#right-pane .chat
-	position: absolute
-	width: right-pane-width
-	top: 175px + 2px
-	bottom: 120px
-	background: darken(white, 5)
-	border-bottom: 2px solid lighten(black, 80)
+	.chat
+		position: absolute
+		width: right-pane-width
+		top: 175px + 2px
+		bottom: 120px
+		background: darken(white, 5)
+		border-bottom: 2px solid lighten(black, 80)
 
-#right-pane .box
-	position: absolute
-	height: 120px
-	bottom: 0
-	left: 0
-	right: 0
-	background: white
-	outline: none
-	border: none
+	.box
+		position: absolute
+		height: 120px
+		bottom: 0
+		left: 0
+		right: 0
+		background: white
+		outline: none
+		border: none

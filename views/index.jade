@@ -26,17 +26,15 @@ html
 			#navbox.
 				<div class="team-button" {{ action "addTeam" target="controller" }}>
 					<div class="add"></div>
-					<span>Add team</span>
+					<span>Add team </span>
 				</div>
-				<div class="invitation" {{ action "viewInvites" }}>
-					<div class="view">1</div>
+				<div class="invitation-button" {{ action "viewInvites" }}>
+					<div class="view">{{content.invites.content.length}}</div>
 					<span>Invitations</span>
 				</div>
 
-
-
 			#team-container.
-				{{#each team in content}}
+				{{#each team in content.teams}}
 					{{#with team}}
 						{{#view App.SingleTeamView teamBinding="team"}}
 							<div id="name">
@@ -52,12 +50,7 @@ html
 									{{view App.SingleMemberView memberBinding="member"}}
 								{{/each}}
 								{{#each member in pending}}
-									{{#with member}}	
-										<div class="memb pending">
-											<span>{{ email }}</span>
-											<div class="pref"></div>
-										</div>
-									{{/with}}
+									{{view App.PendingSingleMemberView memberBinding="member"}}
 								{{/each}}
 								{{#each slot in openSlots}}
 									{{view App.InviteTeamMemberTextareaView placeholder="Add a member" teamBinding="team"}}
@@ -81,6 +74,13 @@ html
 				</div>
 			{{/with}}
 
+		script(type='text/x-handlebars', 'data-template-name'='pendingsinglemember').
+			{{#with member}}
+				<div class="memb pending">
+					<span>{{ email }}</span>
+					<div class="pref"></div>
+				</div>
+			{{/with}}
 
 		script(type='text/x-handlebars', 'data-template-name'='invitations')	
 			#navbox.
@@ -88,13 +88,32 @@ html
 					<div class="add"></div>
 					<span>Teams</span>
 				</div>
-
-
-			#team-container.
+			#invite-container.
 				{{#each invite in content}}
-					{{invite.team}}
+					{{view App.SingleInvitationView inviteBinding="invite"}}
 				{{/each}}
 
+		script(type='text/x-handlebars', 'data-template-name'='singleinvitation').
+			{{#with invite}}
+				<div class="name">{{name}}</div>
+				<div class="invited-by"><span>Invited by</span> Max Gillett</div>
+				<div class="permissions">
+					<span>Can:</span>
+						<ul>
+							<li>Invite members</li>
+							<li>Delete members</li>
+							<li>View past chats</li>
+						</ul>
+					<span>Cannot:</span>
+						<ul>
+							<li>Delete old users</li>
+						</ul>
+				</div>
+				<div class="decision">
+					<div class="accept">Accept</div>
+					<div class="decline">Decline</div>
+				</div>
+			{{/with}}
 
 		script(type='text/x-handlebars', 'data-template-name'='room')
 			#left-pane

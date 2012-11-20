@@ -1,0 +1,154 @@
+// Dashboard
+
+#navbox
+  position: absolute
+  top: header_height + 20px
+  width: 115px
+  bottom: 20px
+  border-right: 1px solid darken(white, 20)
+
+  .team-button
+    square-button('/images/plus.png')
+
+  .return-team-button
+    square-button()
+
+  .invitation-button
+    square-button()
+    top: 20px
+
+    .view 
+      position: relative
+      top: 5px
+      text-align: center
+      width: 62px
+      height: 25px
+      color: lighten(black, 30)
+      font-size: 32px
+      font-weight: bold
+
+// Team container
+
+#team-container
+  position: absolute
+  top: header_height
+  bottom: 0
+  right: right-pane-width
+  overflow: auto
+  left: 125px
+  padding: 20px
+
+  .team
+    float: left
+    margin-right: 20px
+    margin-bottom: 20px
+    width: 225px
+    background: team_bg
+
+    &:nth-of-type(3n - 2) #name
+      background: #8a646c
+
+      .room
+        background: lighten(#a67983, 7)
+
+    &:nth-of-type(3n - 1) #name
+      background: #64728a
+
+      .room
+        background: lighten(#64728a, 14)
+
+    &:nth-of-type(3n) #name
+      background: lighten(black, 45)
+
+      .room
+        background: lighten(black, 60)
+
+    #name 
+      position: relative
+      font-family: 'Ubuntu', sans-serif;
+      color: white
+      font-size: 16px
+      padding: 6px
+
+      input
+        background: none
+        width: 175px
+        outline: none
+        font-family: 'Ubuntu', sans-serif;
+        color: white
+        box-shadow: none
+        border: none
+        font-size: 16px
+        padding: 0 6px
+        margin: 0 
+
+      span
+        cursor: pointer
+        position: relative
+        left: 6px
+
+      .room
+        cursor: pointer
+        position: absolute
+        right: 10px
+        top: 6px
+        width: 25px
+        height: 18px  
+
+  #members
+    padding: 10px 10px 0px 10px
+
+    .memb 
+      cursor: pointer
+      position: relative
+      font-family: 'Open Sans', sans-serif
+      font-weight: 600
+      background: lighten(team_bg, 10)
+      margin-bottom: 10px
+
+      .offline
+        display: inline-block
+        position: relative
+        top: -2px
+        left: 5px
+        margin-right: 4px
+        width: 5px
+        height: 5px
+        border-radius: 3px
+        background: darken(white, 28)
+
+      .online
+        @extends #team-container #members .memb .offline
+        background: #3a9849
+
+      span
+        display: inline-block
+        padding: 6px  
+        width: 160px
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+      .pref
+        display: none
+        position: absolute
+        top: 4px
+        right: 4px
+        width: 20px
+        height: 20px
+        image: '/images/edit-img.png' 20px 20px
+
+    .open
+      font-size: 12px
+      padding-left: 5px
+      height: 30px
+      width: 100%
+      background: lighten(team_bg, 5)
+      color: lighten(team_bg, -20)
+      border: 2px solid lighten(team_bg, -10)
+
+    .pending 
+      span
+        color: lighten(black, 55)
+        padding-left: 18px
+
