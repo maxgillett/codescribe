@@ -3,28 +3,32 @@ var app = module.parent.exports.app
   , redisClient = module.parent.exports.redisClient
   , config = require('../config')
 
-app.get('/', function(req, res){
-	res.render('index');
+// Publicly available routes
+app.get('/', authorizeUser);
+
+// Available only to authorized users
+app.get('/teams*', ensureAuthenticated, authorizeUser);
+app.get('/rooms/:id', ensureAuthenticated, authorizeUser);
+app.get('/logout', ensureAuthenticated, function(req, res){
+  req.logout();
+  res.redirect('/');
 });
 
-app.get('/teams*', ensureAuthenticated, function(req, res){
-	res.render('index');
-});
-
-app.get('/rooms/:id', ensureAuthenticated, function(req, res){
-	res.render('index');
-});
-
+// Authentication routes
 app.get('/auth/github', passport.authenticate('github'));
-
 app.get('/auth/github/callback', 
 	passport.authenticate('github', {
 		failureRedirect: '/failed',
-		successRedirect: '/'
+		successRedirect: '/teams'
 	})
 );
 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
   res.redirect('/')
+}
+
+function authorizeUser(req, res) {
+  var auth = req.session.passport.user ? "authorized" : false
+  res.render('index', {auth: auth});
 }

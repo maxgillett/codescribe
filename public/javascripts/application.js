@@ -27,6 +27,12 @@ App = Em.Application.create({
   	templateName: 'application'
 	}),
 
+  HomeController:  Em.Controller.extend({}),
+
+  HomeView:  Ember.View.extend({
+    templateName: 'home'
+  }),
+
   DashboardController:  Em.Controller.extend({
 
     addTeam: function() {
@@ -46,17 +52,15 @@ App = Em.Application.create({
         trigger: function() {
           var pendingUser = query.get("firstObject");
 
-          pending_user = team.get('pendingUsers').createRecord({
+          pendingUserRecord = team.get('pendingUsers').createRecord({
             user: pendingUser
           });
 
-          pendingUser.get('pendingUsers').pushObject(pending_user);
+          pendingUser.get('pendingUsers').pushObject(pendingUserRecord);
           
           App.store.commit();
 
           team.notifyPropertyChange('pending');
-
-
         }
       }
       query.addObserver('isLoaded', exec, 'trigger');
@@ -153,7 +157,14 @@ App = Em.Application.create({
   }),
 
   InvitationsController:  Em.Controller.extend({
-
+    acceptInvitation: function(invite) {
+      invite.set("accepted", true);
+      App.store.commit();
+    },
+    deleteInvitation: function(invite) {
+      invite.deleteRecord();
+      App.store.commit();
+    }
   }),
 
   InvitationsView:  Em.View.extend({
@@ -163,11 +174,10 @@ App = Em.Application.create({
   SingleInvitationView: Ember.View.extend({
     templateName: 'singleinvitation',
     classNames: ["invitation"],
-    mouseEnter: function(e) {
-      this.$('.pref').show();
-    },
-    mouseLeave: function(e) {
-      this.$('.pref').hide();
+    accept: function() {
+      console.log("deleting invitation");
+      var invite = this.invite;
+      App.router.get("invitationsController").acceptInvitation(invite);
     }
   }),
 
@@ -175,7 +185,7 @@ App = Em.Application.create({
   }),
 
   RoomView:  Em.View.extend({
-    templateName:  'room',
+    templateName:  'room'
   }),
 
   ChatTextareaView:  Em.TextArea.extend({
@@ -199,6 +209,7 @@ App = Em.Application.create({
     	dashboard:  Ember.Route.extend({
     		route:  '/',
     		connectOutlets: function(router, context) {
+          router.get("applicationController").connectOutlet('content', 'home')
     		}
       }),
       teams:  Em.Route.extend({
@@ -266,10 +277,12 @@ socket.on('connect', function () {
 DS.RESTAdapter.map("App.Team", { 
   primaryKey: "_id", 
   memberUsers: { 
-    key: 'members_users' 
+    key: 'members_users',
+    embedded: 'load'
   },
   pendingUsers: {
-    key: 'pending_users'
+    key: 'pending_users',
+    embedded: 'load'
   } 
 });
 
@@ -296,13 +309,7 @@ DS.RESTAdapter.map("App.PendingUser", {
 });
 
 DS.RESTAdapter.map("App.Invite", {
-  primaryKey: "_id", 
-  memberUsers: { 
-    key: 'members_users' 
-  },
-  pendingUsers: {
-    key: 'pending_users'
-  } 
+  primaryKey: "_id"
 });
 
 // Store
@@ -407,7 +414,8 @@ App.User = DS.Model.extend({
 });
 
 App.Invite = DS.Model.extend({
-  name: DS.attr('string')
+  name: DS.attr('string'),
+  accepted: DS.attr('string')
 });
 
 

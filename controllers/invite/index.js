@@ -14,22 +14,6 @@ exports.show = function(req, res, next) {
 exports.index = function(req, res, next) {
   var uid = req.session.passport.user;
 
-
-  async.waterfall([
-    function(callback){
-        callback(null, 'one', 'two');
-    },
-    function(arg1, arg2, callback){
-        callback(null, 'three');
-    },
-    function(arg1, callback){
-        // arg1 now equals 'three'
-        callback(null, 'done');
-    }
-  ], function (err, result) {
-     // result now equals 'done'    
-  });
-
   db.pendingUser.find({'user': uid })
     .populate('team', 'name')
     .exec(function(err, pendingUsers) {
@@ -40,7 +24,6 @@ exports.index = function(req, res, next) {
       ids = _.pluck(pendingUsers, '_id');
 
       invites = _.zip(names, ids);
-
       invites = _.map(invites, function(arr) {
         return _.object(['name', '_id'], arr);
       });
@@ -51,15 +34,28 @@ exports.index = function(req, res, next) {
 };
 
 exports.create = function(req, res, next) {
-  var uid = req.session.passport.user
-    , team = req.body.team;
+  var uid = req.session.passport.user;
 
 };
 
 exports.update = function(req, res, next) {
   var uid = req.session.passport.user
     , id = req.param("id")
-    , team = req.body.team;
+    , invite = req.body.invite;
 
+  if (invite.accepted) {
+    db.team.addMember(id, uid, function(err, team) {
+      res.json({ team: team }); 
+    });
+  }
 
 };
+
+exports.delete = function(req, res, next) {
+  var uid = req.session.passport.user
+    , id = req.param("id");
+
+  db.team.removePendingMember(id, uid, function(err, pendingUser) {
+    res.json({invite: null});
+  });
+}

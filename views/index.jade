@@ -22,6 +22,11 @@ html
 			#header
 			{{ outlet content }}
 
+		script(type='text/x-handlebars', 'data-template-name'='home')	
+			unless auth
+				#login
+					a(href="/auth/github") Login
+
 		script(type='text/x-handlebars', 'data-template-name'='dashboard')	
 			#navbox.
 				<div class="team-button" {{ action "addTeam" target="controller" }}>
@@ -106,12 +111,11 @@ html
 						</ul>
 					<span>Cannot:</span>
 						<ul>
-							<li>Delete old users</li>
+							<li>Delete team</li>
 						</ul>
 				</div>
 				<div class="decision">
-					<div class="accept">Accept</div>
-					<div class="decline">Decline</div>
+					<div class="accept" {{action "accept" target="view"}}>Accept</div>
 				</div>
 			{{/with}}
 

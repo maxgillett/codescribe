@@ -20,6 +20,7 @@
 		"validator": "*",
 		"underscore": "*",
 		"node-xmpp": "*",
-		"async": "*"
+		"async": "*",
+		"mongoose-troop": "*"
 	}
 }

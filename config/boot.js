@@ -23,13 +23,16 @@ module.exports = function(options){
       verbose && console.log('     ALL %s -> before', path);
     }
 
-    // generate routes based
-    // on the exported methods
+    // generate api routes based on the exported methods
     for (var key in obj) {
       // "reserved" exports
       if (~['name', 'prefix', 'engine', 'before'].indexOf(key)) continue;
       // route exports
       switch (key) {
+        case 'delete':
+          method = 'delete';
+          path = '/' + name + 's/:id';
+          break;
         case 'show':
           method = 'get';
           path = '/' + name + 's/:id';
