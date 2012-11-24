@@ -2,19 +2,6 @@ String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
-// State flag helper function. See https://github.com/ghempton/ember-router-example/blob/master/js/app.js
-
-function stateFlag(name) {
-  return Ember.computed(function() {
-    var state = App.router.currentState;
-    while(state) {
-      if(state.name === name) return true;
-      state = state.get('parentState');
-    }
-    return false;
-  }).property('App.router.currentState');
-}
-
 // Application
 
 App = Em.Application.create({
@@ -34,7 +21,6 @@ App = Em.Application.create({
   }),
 
   DashboardController:  Em.Controller.extend({
-
     addTeam: function() {
       App.store.createRecord(App.Team,  { name: "Untitled", slots: 5});
       App.store.commit();
@@ -43,13 +29,14 @@ App = Em.Application.create({
       var query = App.store.find(App.User, { email: val });
       var exec = {
         trigger: function() {
-          var pendingUser = query.get("firstObject");
+          var user = query.get("firstObject");
 
-          pendingUserRecord = team.get('pendingUsers').createRecord({
-            user: pendingUser
+          pendingUserRecord = team.get('members').createRecord({
+            user: user,
+            pending: true
           });
 
-          pendingUser.get('pendingUsers').pushObject(pendingUserRecord);
+          user.get('members').pushObject(pendingUserRecord);
           
           App.store.commit();
 
@@ -269,40 +256,26 @@ socket.on('connect', function () {
 
 DS.RESTAdapter.map("App.Team", { 
   primaryKey: "_id", 
-  memberUsers: { 
-    key: 'members_users',
+  members: { 
+    key: 'members',
     embedded: 'load'
-  },
-  pendingUsers: {
-    key: 'pending_users',
-    embedded: 'load'
-  } 
+  }
 });
 
 DS.RESTAdapter.map("App.User", {
-  primaryKey: "_id", 
-  memberUsers: { 
-    key: 'members_users' 
-  },
-  pendingUsers: {
-    key: 'pending_users'
-  } 
+  primaryKey: "_id"
 });
 
-DS.RESTAdapter.map("App.MemberUser", {
-  primaryKey: "_id", 
-  team: {key: 'team'}, 
-  user: {key: 'user'} 
-});
-
-DS.RESTAdapter.map("App.PendingUser", { 
+DS.RESTAdapter.map("App.Member", {
   primaryKey: "_id", 
   team: {key: 'team'}, 
   user: {key: 'user'} 
 });
 
 DS.RESTAdapter.map("App.Invite", {
-  primaryKey: "_id"
+  primaryKey: "_id",
+  team: {key: 'team'}, 
+  user: {key: 'user'} 
 });
 
 // Store
@@ -312,28 +285,21 @@ App.store = DS.Store.create({
 	adapter: DS.RESTAdapter.create({
     namespace: 'api/v1',
 		mappings: {
+      member: 'App.Member',
       team: 'App.Team',
       user: 'App.User',
-      memberUser: 'App.MemberUser',
-      pendingUser: 'App.PendingUser',
       invite: 'App.Invite'
   	}
 	})
 });
 
-
 // Join table models
 
-App.MemberUser = DS.Model.extend({
+App.Member = DS.Model.extend({
   team: DS.belongsTo('App.Team'),
-  user: DS.belongsTo('App.User')
+  user: DS.belongsTo('App.User'),
+  pending: DS.attr('boolean')
 });
-
-App.PendingUser = DS.Model.extend({
-  team: DS.belongsTo('App.Team'),
-  user: DS.belongsTo('App.User')
-});
-
 
 // Models
 
@@ -341,23 +307,22 @@ App.Team = DS.Model.extend({
   name: DS.attr('string'),
   slots: DS.attr('string'),
 
-  memberUsers: DS.hasMany('App.MemberUser'),
-  pendingUsers: DS.hasMany('App.PendingUser'),
+  members: DS.hasMany('App.Member'),
 
-  members: function() {
-    return this.get("memberUsers").mapProperty('user');
-  }.property('memberUsers.length'),
+  accepted: function() {
+    return this.get("members").filterProperty('pending', false).mapProperty('user');
+  }.property('members.length'),
 
   pending: function() {
-    return this.get("pendingUsers").mapProperty('user');
-  }.property('pendingUsers.length'),
+    return this.get("members").filterProperty('pending', true).mapProperty('user');
+  }.property('members.length'),
 
   openSlots: function() {
     var len = this.get("slots") 
-              - this.get("members").get("length")
+              - this.get("accepted").get("length")
               - this.get("pending").get("length");
     return new Array(len)
-  }.property('members.length', 'pending.length'),
+  }.property('members.length'),
 
   nameChanged: Ember.observer(function() {
     App.store.commit();
@@ -372,17 +337,15 @@ App.User = DS.Model.extend({
   email: DS.attr('string'),
   online: DS.attr('string'),
 
-  // These should be able to be removed soon when
+  // This should be able to be removed soon when
   // 'belongs to' will be allowed without a corresponding
   // hasmany. These will remain empty for now. 
-  memberUsers: DS.hasMany('App.MemberUser'),
-  pendingUsers: DS.hasMany('App.PendingUser'),
+  members: DS.hasMany('App.Member')
 });
 
 App.Invite = DS.Model.extend({
   name: DS.attr('string'),
-  accepted: DS.attr('string')
+  accepted: DS.attr('boolean')
 });
-
 
 App.initialize();

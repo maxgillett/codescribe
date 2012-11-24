@@ -39,33 +39,36 @@ html
 				</div>
 
 			#team-container.
-				{{#each team in content.teams}}
-					{{#with team}}
-						{{#view App.SingleTeamView teamBinding="team"}}
-							<div id="name">
-								{{#if renaming}}
-									{{view App.NameTextareaView valueBinding="name" teamBinding="team"}}
-								{{else}}
-									<span {{action "rename" target="view" on="doubleClick"}} >{{ name }}</span>
-								{{/if}}
-								<div class="room" {{action goToRoom team}} ></div>
-							</div>
-							<div id="members">
-								{{#each member in members}}
-									{{view App.SingleMemberView memberBinding="member"}}
-								{{/each}}
-								{{#each member in pending}}
-									{{view App.PendingSingleMemberView memberBinding="member"}}
-								{{/each}}
-								{{#each slot in openSlots}}
-									{{view App.InviteTeamMemberTextareaView placeholder="Add a member" teamBinding="team"}}
-								{{/each}}		
-							</div>
-						{{/view}}
-					{{/with}}
-				{{/each}}
-
-
+				{{#unless content.teams.isUpdating}}
+					{{#each team in content.teams}}
+						{{#with team}}
+							{{#view App.SingleTeamView teamBinding="team"}}
+								<div id="name">
+									{{#if renaming}}
+										{{view App.NameTextareaView valueBinding="name" teamBinding="team"}}
+									{{else}}
+										<span {{action "rename" target="view" on="doubleClick"}} >{{ name }}</span>
+									{{/if}}
+									<div class="room" {{action goToRoom team}} ></div>
+								</div>
+								<div id="members">
+									{{#each member in accepted}}
+										{{view App.SingleMemberView memberBinding="member"}}
+									{{/each}}
+									{{#each member in pending}}
+										{{view App.PendingSingleMemberView memberBinding="member"}}
+									{{/each}}
+									{{#each slot in openSlots}}
+										{{view App.InviteTeamMemberTextareaView placeholder="Add a member" teamBinding="team"}}
+									{{/each}}		
+								</div>
+							{{/view}}
+						{{/with}}
+					{{/each}}
+				{{/unless}}
+				{{#if content.teams.isUpdating}}
+					<div>Loading...</div>
+				{{/if}}
 		script(type='text/x-handlebars', 'data-template-name'='singlemember').
 			{{#with member}}
 				<div class="memb">
@@ -115,7 +118,13 @@ html
 						</ul>
 				</div>
 				<div class="decision">
-					<div class="accept" {{action "accept" target="view"}}>Accept</div>
+					<div class="accept" {{action "accept" target="view"}}>
+						{{#if accepted}}
+							Accepted!
+						{{else}}
+							Accept
+						{{/if}}
+					</div>
 				</div>
 			{{/with}}
 

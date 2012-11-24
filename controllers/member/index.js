@@ -2,7 +2,7 @@ var db = require('../../config/db')
   , _ = require('underscore')
   , async = require('async');
 
-exports.name = "member_user";
+exports.name = "member";
 
 exports.show = function(req, res, next){
   var id = req.param("id");
@@ -11,6 +11,18 @@ exports.show = function(req, res, next){
     .exec(function(err, memberUser) {
       res.json({ memberUser: memberUser });
     });
+};
+
+exports.create = function(req, res, next){
+  var uid = req.session.passport.user
+    , data = req.body.member;
+
+  // Why is ember requiring me to pass only a single 
+  // member? (says that cannot find mapping for 'members')
+  // Can't I send all of the members over?
+  db.team.addPendingMember(data, uid, function(err, member) {
+    res.json({ member: member });
+  })
 };
 
 // Can this be split up into an index and query route?

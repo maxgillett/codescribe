@@ -2,30 +2,29 @@ var db = require('../../config/db')
   , _ = require('underscore')
   , async = require('async');
 
-// Invites are a layer that sit on top of pendingUsers. 
-// An invite ID is a pendingUser ID
-
 exports.show = function(req, res, next) {
   var uid = req.session.passport.user
     , id = req.param("id");
 
-}
+};
 
 exports.index = function(req, res, next) {
   var uid = req.session.passport.user;
 
-  db.pendingUser.find({'user': uid })
-    .populate('team', 'name')
-    .exec(function(err, pendingUsers) {
+  db.invite.find({'user': uid })
+    .populate('team')
+    .exec(function(err, invites) {
       var names, ids, invites;
       
-      names = _.pluck(pendingUsers, 'team');
+      // Object manipulation to retrieve just ids + names
+      names = _.pluck(invites, 'team');
       names = _.pluck(names, 'name');
-      ids = _.pluck(pendingUsers, '_id');
+      ids = _.pluck(invites, '_id');
+      accepted = _.pluck(invites, 'accepted');
+      invites = _.zip(names, ids, accepted);
 
-      invites = _.zip(names, ids);
       invites = _.map(invites, function(arr) {
-        return _.object(['name', '_id'], arr);
+        return _.object(['name', '_id', 'accepted'], arr);
       });
 
       res.json({ invites: invites }); 
@@ -44,11 +43,10 @@ exports.update = function(req, res, next) {
     , invite = req.body.invite;
 
   if (invite.accepted) {
-    db.team.addMember(id, uid, function(err, team) {
+    db.team.addMember(id, invite, uid, function(err, team) {
       res.json({ team: team }); 
     });
   }
-
 };
 
 exports.delete = function(req, res, next) {
