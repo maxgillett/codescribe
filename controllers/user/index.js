@@ -6,7 +6,7 @@ var db = require('../../config/db')
 exports.show = function(req, res, next){
   var id = req.param("id");
 
-  db.user.findById(id)
+  db.user.findById(id, '-members_users -pending_users')
     .exec(function(err, user) {
       res.json({ user: user });
     });
@@ -20,7 +20,7 @@ exports.index = function(req, res, next){
   switch (key) {
     case 'email':
       // Find or create
-      db.user.findOne({email: obj.email}, '-name')
+      db.user.findOne({email: obj.email}, '-name -members_users -pending_users')
         .exec(function(err, user) {
           if (!user) {
             db.user.create({email: obj.email}, function(err, newuser) {

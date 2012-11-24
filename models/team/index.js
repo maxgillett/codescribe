@@ -70,6 +70,30 @@ schema.statics.createTeam = function(data, uid, cb) {
   });  
 }
 
+schema.statics.removeTeam = function(id, uid, cb) {
+  async.waterfall([
+    function(callback){
+      db.team.create(data, function(err, team) {
+        callback(null, team);
+      });
+    },
+    function(team, callback) {
+      db.memberUser.create({ user: uid, team: team._id }, function(err, memberUser) {
+        callback(null, team, memberUser)
+      });
+    }, 
+    function(team, memberUser, callback){
+      team.members.push(uid);
+      team.members_users.push(memberUser._id);
+      team.save(function(err, team) {
+        callback(null, team, memberUser)
+      });
+    }
+  ], function (err, team, memberUser) {
+     cb(err, team, memberUser); 
+  });  
+}
+
 schema.statics.addMember = function(id, uid, cb) {
   async.waterfall([
     function(callback){

@@ -18,7 +18,6 @@ exports.show = function(req, res, next) {
 exports.index = function(req, res, next) {
   var uid = req.session.passport.user;
 
-  // Refactor into async control structure
   db.team.findAllTeams(uid, 
     function(err, results) {
       var obj = _.object(['teams', 'memberUsers', 'pendingUsers'], results);
@@ -34,9 +33,7 @@ exports.create = function(req, res, next) {
   db.team.createTeam(data, uid, function(err, team, memberUser) {
     team = _.omit(team.toObject(), 'pending', 'members');
     memberUser = memberUser.toObject();;
-
     team.members_users = [memberUser];
-
     res.json({ team: team });
   });
 };

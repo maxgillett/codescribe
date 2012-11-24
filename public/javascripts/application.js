@@ -36,14 +36,7 @@ App = Em.Application.create({
   DashboardController:  Em.Controller.extend({
 
     addTeam: function() {
-      var team = App.store.createRecord(App.Team,  { name: "Untitled", slots: 5});
-      var exec = {
-        trigger: function() {
-          team.notifyPropertyChange('members');
-        }
-      };
-
-      team.addObserver('memberUsers.length', exec, 'trigger');
+      App.store.createRecord(App.Team,  { name: "Untitled", slots: 5});
       App.store.commit();
     },
     addMember: function(team, val) {
@@ -319,12 +312,12 @@ App.store = DS.Store.create({
 	adapter: DS.RESTAdapter.create({
     namespace: 'api/v1',
 		mappings: {
-          team: 'App.Team',
-          user: 'App.User',
-          memberUser: 'App.MemberUser',
-          pendingUser: 'App.PendingUser',
-          invite: 'App.Invite'
-    	}
+      team: 'App.Team',
+      user: 'App.User',
+      memberUser: 'App.MemberUser',
+      pendingUser: 'App.PendingUser',
+      invite: 'App.Invite'
+  	}
 	})
 });
 
@@ -352,23 +345,12 @@ App.Team = DS.Model.extend({
   pendingUsers: DS.hasMany('App.PendingUser'),
 
   members: function() {
-    var that = this;
-    var teamUsers = App.store.filter(App.MemberUser, function(hash) {
-      if (hash.get('team').id == that.id) { return true; }
-    });
-
-    return teamUsers.mapProperty('user');
-  }.property('memberUsers'),
+    return this.get("memberUsers").mapProperty('user');
+  }.property('memberUsers.length'),
 
   pending: function() {
-    var that = this;
-    var teamUsers = App.store.filter(App.PendingUser, function(hash) {
-      if (hash.get('team').id == that.id) { return true; }
-    });
-
-    // This is a hack. Why am I having to call "uniq" here"
-    return teamUsers.mapProperty('user').uniq();
-  }.property('pendingUsers'),
+    return this.get("pendingUsers").mapProperty('user');
+  }.property('pendingUsers.length'),
 
   openSlots: function() {
     var len = this.get("slots") 
@@ -390,27 +372,11 @@ App.User = DS.Model.extend({
   email: DS.attr('string'),
   online: DS.attr('string'),
 
+  // These should be able to be removed soon when
+  // 'belongs to' will be allowed without a corresponding
+  // hasmany. These will remain empty for now. 
   memberUsers: DS.hasMany('App.MemberUser'),
   pendingUsers: DS.hasMany('App.PendingUser'),
-
-  teams: function() {
-    var that = this;
-    var teamUsers = App.store.filter(App.MemberUser, function(hash) {
-      if (hash.get('user').get("id") == that.id) { return true; }
-    });
-
-    return teamUsers.mapProperty('team');
-  }.property('membersUsers'),
-
-  pending: function() {
-    var that = this;
-    var teamUsers = App.store.filter(App.PendingUser, function(hash) {
-      if (hash.get('user').get("id") == that.id) { return true; }
-    });
-
-    return teamUsers.mapProperty('team');
-  }.property('pendingUsers'),
-
 });
 
 App.Invite = DS.Model.extend({
