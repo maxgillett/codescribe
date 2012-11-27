@@ -30,10 +30,11 @@ The following class methods are available:
  */
 
 schema.statics.findAllTeams = function(uid, cb) {
+  console.log(uid)
   async.waterfall([
     function(callback){
       db.team.find({})
-        //.where('members').in([uid])
+        .where('members').elemMatch({ user: uid, pending: false})
         .exec(function(err, teams) {
           callback(null, teams);
         });
@@ -43,7 +44,7 @@ schema.statics.findAllTeams = function(uid, cb) {
 
 schema.statics.createTeam = function(data, uid, cb) {
   async.waterfall([
-    function(callback){
+    function(callback) {
       db.team.create(data, function(err, team) {
         team.members.push({
           team: team._id,
@@ -85,21 +86,25 @@ schema.statics.removeTeam = function(id, uid, cb) {
 }
 
 schema.statics.addMember = function(id, data, uid, cb) {
-  async.parallel([
+  async.waterfall([
     function(callback){
       db.invite.findByIdAndRemove(id)
         .exec(function(err, invite) {
-          callback(null);
+          callback(null, invite.team);
         });
     },
     function(team, callback){
-      db.team.findOne({'members.user': uid},
-        function(err, team) {
-          console.log(team.member.pending)
-          team.member.pending = false;
+      db.team.findOne({'_id': team, 'members.user': uid, 'members.pending': true })
+        .exec(function(err, team) {
+          // Find out how to do this using Mongoose API
+          for (var i=0; i < team.members.length; i++){
+            if (team.members[i].user == uid){
+              team.members[i].pending = false;
+            } 
+          }
           team.save(function(err, team) {
             callback(null, team);
-          })
+          });
         }
       );
     }

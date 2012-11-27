@@ -7,7 +7,14 @@ String.prototype.capitalize = function() {
 App = Em.Application.create({
 
 	ApplicationController: Ember.Controller.extend({
-    
+     retrieveCurrentUser: function() {
+        var controller = this;
+        Ember.$.getJSON('/users/me', function(data) {
+            App.store.load(App.User, data);
+            var currentUser = App.store.find(data.id);
+            controller.set('content', currentUser);
+        });
+      }
   }),
 
 	ApplicationView: Ember.View.extend({

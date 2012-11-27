@@ -24,6 +24,7 @@ html
 
 		script(type='text/x-handlebars', 'data-template-name'='home')	
 			unless auth
+
 				#login
 					a(href="/auth/github") Login
 
@@ -135,9 +136,13 @@ html
 				.team.
 					{{#with content}}
 						<div id="name"> {{name}} </div>
+						{{#each member in accepted}}
+							{{#with member}}
+								{{name}}
+							{{/with}}
+						{{/each}}
 					{{/with}}
 				.chat
 				{{view App.ChatTextareaView placeholder="Send a message"}}
 
 		script(src='/javascripts/application.js')
-
