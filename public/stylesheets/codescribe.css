@@ -311,7 +311,8 @@ table {
   margin-bottom: 10px;
 }
 #team-container #members .memb .offline,
-#team-container #members .memb .online {
+#team-container #members .memb .online,
+#right-pane .team .memb .online {
   display: inline-block;
   position: relative;
   top: -2px;
@@ -433,28 +434,6 @@ table {
   background: #81b078;
   color: #fff;
 }
-body {
-  font: 13px 'helvetica neue', helvetica, arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  overflow: hidden;
-}
-li {
-  list-style: none;
-}
-pre,
-xmp,
-plaintext,
-listing {
-  display: block;
-  font-family: monospace;
-  white-space: pre;
-  margin: 0em 0px;
-}
-#header {
-  width: 100%;
-  height: 33px;
-  background: #2f2f2f;
-}
 #left-pane {
   position: absolute;
   width: 225px;
@@ -496,6 +475,40 @@ listing {
   font-size: 16px;
   padding: 6px;
 }
+#right-pane .team #name .room {
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 6px;
+  width: 25px;
+  height: 18px;
+  background: #ad8e94;
+}
+#right-pane .team .memb {
+  padding: 5px 5px 5px 5px;
+  background: #e6e6e6;
+  border-bottom: 1px solid #b3b3b3;
+  color: #1a1a1a;
+  font-family: 'Open Sans', sans-serif;
+}
+#right-pane .team .memb .offline {
+  display: inline-block;
+  position: relative;
+  top: -2px;
+  left: 3px;
+  margin-right: 8px;
+  width: 5px;
+  height: 5px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  background: #b8b8b8;
+}
+#right-pane .team .memb .online {
+  background: #3a9849;
+}
+#right-pane .team .memb:last-of-type {
+  padding-bottom: 5px;
+}
 #right-pane .chat {
   position: absolute;
   width: 250px;
@@ -513,4 +526,26 @@ listing {
   background: #fff;
   outline: none;
   border: none;
+}
+body {
+  font: 13px 'helvetica neue', helvetica, arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+li {
+  list-style: none;
+}
+pre,
+xmp,
+plaintext,
+listing {
+  display: block;
+  font-family: monospace;
+  white-space: pre;
+  margin: 0em 0px;
+}
+#header {
+  width: 100%;
+  height: 33px;
+  background: #2f2f2f;
 }

@@ -1,148 +1,147 @@
 doctype strict 5
 html
-	head
-		title Codescribe
-		link(rel='stylesheet', href='/stylesheets/codescribe.css')
-		link(rel='stylesheet', href='/javascripts/vendor/codemirror/lib/codemirror.css')
-		link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Ubuntu:700')
-		link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Open+Sans:400,600')
-		script(src='/javascripts/vendor/jquery-1.8.2.min.js')
-		script(src='/javascripts/vendor/underscore.js')
-		script(src='/socket.io/socket.io.js')
-		script(src='/javascripts/vendor/handlebars-1.0.rc.1.js')
-		script(src='/javascripts/vendor/moment.min.js')
-		script(src='/javascripts/vendor/ember.js')
-		script(src='/javascripts/vendor/ember-data.js')
-		script(src='/javascripts/vendor/codemirror/lib/codemirror.js')
-		script(src='/javascripts/vendor/codemirror/lib/util/runmode.js')
-		script(src='/javascripts/vendor/codemirror/mode/javascript/javascript.js')
-		script(src='/javascripts/vendor/jquery.dotdotdot-1.5.1.js')	
-	body
-		script(type='text/x-handlebars', 'data-template-name'='application')
-			#header
-			{{ outlet content }}
+  head
+    title Codescribe
+    link(rel='stylesheet', href='/stylesheets/codescribe.css')
+    link(rel='stylesheet', href='/javascripts/vendor/codemirror/lib/codemirror.css')
+    link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Ubuntu:700')
+    link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Open+Sans:400,600')
+    script(src='/javascripts/vendor/jquery-1.8.2.min.js')
+    script(src='/javascripts/vendor/underscore.js')
+    script(src='/socket.io/socket.io.js')
+    script(src='/javascripts/vendor/handlebars-1.0.rc.1.js')
+    script(src='/javascripts/vendor/moment.min.js')
+    script(src='/javascripts/vendor/ember.js')
+    script(src='/javascripts/vendor/ember-data.js')
+    script(src='/javascripts/vendor/codemirror/lib/codemirror.js')
+    script(src='/javascripts/vendor/codemirror/lib/util/runmode.js')
+    script(src='/javascripts/vendor/codemirror/mode/javascript/javascript.js')
+    script(src='/javascripts/vendor/jquery.dotdotdot-1.5.1.js') 
+  body
+    script(type='text/x-handlebars', 'data-template-name'='application')
+      #header
+      {{ outlet content }}
 
-		script(type='text/x-handlebars', 'data-template-name'='home')	
-			unless auth
+    script(type='text/x-handlebars', 'data-template-name'='home') 
+      unless auth
 
-				#login
-					a(href="/auth/github") Login
+        #login
+          a(href="/auth/github") Login
 
-		script(type='text/x-handlebars', 'data-template-name'='dashboard')	
-			#navbox.
-				<div class="team-button" {{ action "addTeam" target="controller" }}>
-					<div class="add"></div>
-					<span>Add team </span>
-				</div>
-				<div class="invitation-button" {{ action "viewInvites" }}>
-					<div class="view">{{content.invites.content.length}}</div>
-					<span>Invitations</span>
-				</div>
+    script(type='text/x-handlebars', 'data-template-name'='dashboard')  
+      #navbox.
+        <div class="team-button" {{ action "addTeam" target="controller" }}>
+          <div class="add"></div>
+          <span>Add team </span>
+        </div>
+        <div class="invitation-button" {{ action "viewInvites" }}>
+          <div class="view">{{content.invites.content.length}}</div>
+          <span>Invitations</span>
+        </div>
 
-			#team-container.
-				{{#unless content.teams.isUpdating}}
-					{{#each team in content.teams}}
-						{{#with team}}
-							{{#view App.SingleTeamView teamBinding="team"}}
-								<div id="name">
-									{{#if renaming}}
-										{{view App.NameTextareaView valueBinding="name" teamBinding="team"}}
-									{{else}}
-										<span {{action "rename" target="view" on="doubleClick"}} >{{ name }}</span>
-									{{/if}}
-									<div class="room" {{action goToRoom team}} ></div>
-								</div>
-								<div id="members">
-									{{#each member in accepted}}
-										{{view App.SingleMemberView memberBinding="member"}}
-									{{/each}}
-									{{#each member in pending}}
-										{{view App.PendingSingleMemberView memberBinding="member"}}
-									{{/each}}
-									{{#each slot in openSlots}}
-										{{view App.InviteTeamMemberTextareaView placeholder="Add a member" teamBinding="team"}}
-									{{/each}}		
-								</div>
-							{{/view}}
-						{{/with}}
-					{{/each}}
-				{{/unless}}
-				{{#if content.teams.isUpdating}}
-					<div>Loading...</div>
-				{{/if}}
-		script(type='text/x-handlebars', 'data-template-name'='singlemember').
-			{{#with member}}
-				<div class="memb">
-					{{#if online}}
-						<div class="online"></div>
-					{{else}}
-						<div class="offline"></div>
-					{{/if}}
-					<span>{{ name }}</span>
-					<div class="pref"></div>
-				</div>
-			{{/with}}
+      #team-container.
+        {{#unless content.teams.isUpdating}}
+          {{#each team in content.teams}}
+            {{#with team}}
+              {{#view App.SingleTeamView teamBinding="team"}}
+                <div id="name">
+                  {{#if renaming}}
+                    {{view App.NameTextareaView valueBinding="name" teamBinding="team"}}
+                  {{else}}
+                    <span {{action "rename" target="view" on="doubleClick"}} >{{ name }}</span>
+                  {{/if}}
+                  <div class="room" {{action goToRoom team}} ></div>
+                </div>
+                <div id="members">
+                  {{#each member in accepted}}
+                    {{view App.SingleMemberView memberBinding="member"}}
+                  {{/each}}
+                  {{#each member in pending}}
+                    {{view App.PendingSingleMemberView memberBinding="member"}}
+                  {{/each}}
+                  {{#each slot in openSlots}}
+                    {{view App.InviteTeamMemberTextareaView placeholder="Add a member" teamBinding="team"}}
+                  {{/each}}   
+                </div>
+              {{/view}}
+            {{/with}}
+          {{/each}}
+        {{/unless}}
+        {{#if content.teams.isUpdating}}
+        {{/if}}
+        
+    script(type='text/x-handlebars', 'data-template-name'='singlemember').
+      {{#with member}}
+        {{#if online}}
+          <div class="online"></div>
+        {{else}}
+          <div class="offline"></div>
+        {{/if}}
+        <span>{{ name }}</span>
+        <div class="pref"></div>
+      {{/with}}
 
-		script(type='text/x-handlebars', 'data-template-name'='pendingsinglemember').
-			{{#with member}}
-				<div class="memb pending">
-					<span>{{ email }}</span>
-					<div class="pref"></div>
-				</div>
-			{{/with}}
+    script(type='text/x-handlebars', 'data-template-name'='pendingsinglemember').
+      {{#with member}}
+        <span>{{ email }}</span>
+        <div class="pref"></div>
+      {{/with}}
 
-		script(type='text/x-handlebars', 'data-template-name'='invitations')	
-			#navbox.
-				<div class="return-team-button" {{ action "viewTeams" }}>
-					<div class="add"></div>
-					<span>Teams</span>
-				</div>
-			#invite-container.
-				{{#each invite in content}}
-					{{view App.SingleInvitationView inviteBinding="invite"}}
-				{{/each}}
+    script(type='text/x-handlebars', 'data-template-name'='invitations')  
+      #navbox.
+        <div class="return-team-button" {{ action "viewTeams" }}>
+          <div class="add"></div>
+          <span>Teams</span>
+        </div>
+      #invite-container.
+        {{#each invite in content}}
+          {{view App.SingleInvitationView inviteBinding="invite"}}
+        {{/each}}
 
-		script(type='text/x-handlebars', 'data-template-name'='singleinvitation').
-			{{#with invite}}
-				<div class="name">{{name}}</div>
-				<div class="invited-by"><span>Invited by</span> Max Gillett</div>
-				<div class="permissions">
-					<span>Can:</span>
-						<ul>
-							<li>Invite members</li>
-							<li>Delete members</li>
-							<li>View past chats</li>
-						</ul>
-					<span>Cannot:</span>
-						<ul>
-							<li>Delete team</li>
-						</ul>
-				</div>
-				<div class="decision">
-					<div class="accept" {{action "accept" target="view"}}>
-						{{#if accepted}}
-							Accepted!
-						{{else}}
-							Accept
-						{{/if}}
-					</div>
-				</div>
-			{{/with}}
+    script(type='text/x-handlebars', 'data-template-name'='singleinvitation').
+      {{#with invite}}
+        <div class="name">{{name}}</div>
+        <div class="invited-by"><span>Invited by</span> Max Gillett</div>
+        <div class="permissions">
+          <span>Can:</span>
+            <ul>
+              <li>Invite members</li>
+              <li>Delete members</li>
+              <li>View past chats</li>
+            </ul>
+          <span>Cannot:</span>
+            <ul>
+              <li>Delete team</li>
+            </ul>
+        </div>
+        <div class="decision">
+          <div class="accept" {{action "accept" target="view"}}>
+            {{#if accepted}}
+              Accepted!
+            {{else}}
+              Accept
+            {{/if}}
+          </div>
+        </div>
+      {{/with}}
 
-		script(type='text/x-handlebars', 'data-template-name'='room')
-			#left-pane
-			#center-pane
-			#right-pane
-				.team.
-					{{#with content}}
-						<div id="name"> {{name}} </div>
-						{{#each member in accepted}}
-							{{#with member}}
-								{{name}}
-							{{/with}}
-						{{/each}}
-					{{/with}}
-				.chat
-				{{view App.ChatTextareaView placeholder="Send a message"}}
+    script(type='text/x-handlebars', 'data-template-name'='room')
+      #left-pane
+      #center-pane
+      #right-pane
+        .team.
+          {{#with content}}
+            <div id="name"> 
+              <span> {{name}} </span>
+              <div class="room" {{action goToTeams}} ></div>
+            </div>
+            {{#each member in accepted}}
+              {{#with member}}
+                {{view App.RoomSingleMemberView memberBinding="member"}}
+              {{/with}}
+            {{/each}}
+          {{/with}}
+        .chat
+        {{view App.ChatTextareaView placeholder="Send a message"}}
 
-		script(src='/javascripts/application.js')
+    script(src='/javascripts/application.js')

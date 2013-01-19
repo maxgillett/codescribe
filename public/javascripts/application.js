@@ -1,25 +1,25 @@
 String.prototype.capitalize = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
+  return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
 // Application
 
 App = Em.Application.create({
 
-	ApplicationController: Ember.Controller.extend({
-     retrieveCurrentUser: function() {
-        var controller = this;
-        Ember.$.getJSON('/users/me', function(data) {
-            App.store.load(App.User, data);
-            var currentUser = App.store.find(data.id);
-            controller.set('content', currentUser);
-        });
-      }
+  ApplicationController: Ember.Controller.extend({
+   retrieveCurrentUser: function() {
+      var controller = this;
+      Ember.$.getJSON('/users/me', function(data) {
+          App.store.load(App.User, data);
+          var currentUser = App.store.find(data.id);
+          controller.set('content', currentUser);
+      });
+    }
   }),
 
-	ApplicationView: Ember.View.extend({
-  	templateName: 'application'
-	}),
+  ApplicationView: Ember.View.extend({
+    templateName: 'application'
+  }),
 
   HomeController:  Em.Controller.extend({}),
 
@@ -59,6 +59,7 @@ App = Em.Application.create({
   }),
 
   SingleMemberView: Ember.View.extend({
+    classNames: ['memb'],
     templateName: 'singlemember',
     mouseEnter: function(e) {
       this.$('.pref').show();
@@ -70,6 +71,7 @@ App = Em.Application.create({
 
 
   PendingSingleMemberView: Ember.View.extend({
+    classNames: ['memb', 'pending'],
     templateName: 'pendingsinglemember',
     mouseEnter: function(e) {
       this.$('.pref').show();
@@ -175,6 +177,17 @@ App = Em.Application.create({
     templateName:  'room'
   }),
 
+  RoomSingleMemberView: Ember.View.extend({
+    classNames: ['memb'],
+    templateName: 'singlemember',
+    mouseEnter: function(e) {
+      this.$('.pref').show();
+    },
+    mouseLeave: function(e) {
+      this.$('.pref').hide();
+    }
+  }),
+
   ChatTextareaView:  Em.TextArea.extend({
     classNames: ["box"],
     keyDown: function(e) {
@@ -185,19 +198,22 @@ App = Em.Application.create({
     }
   }),
 
-	Router: Ember.Router.extend({
-		location: 'history',
-		enableLogging: true,
+  Router: Ember.Router.extend({
+    location: 'history',
+    enableLogging: true,
     goToRoom: function(router, view) {
       var team = view.context;
       App.router.transitionTo('root.rooms.room', team);
     },
+    goToTeams: function(router, view) {
+      App.router.transitionTo('root.teams.index');
+    },
     root:  Ember.Route.extend({
-    	dashboard:  Ember.Route.extend({
-    		route:  '/',
-    		connectOutlets: function(router, context) {
+      dashboard:  Ember.Route.extend({
+        route:  '/',
+        connectOutlets: function(router, context) {
           router.get("applicationController").connectOutlet('content', 'home')
-    		}
+        }
       }),
       teams:  Em.Route.extend({
         route: '/teams',
@@ -244,7 +260,7 @@ App = Em.Application.create({
           }
         })
       })
-	 })
+   })
 
   })
 
@@ -288,16 +304,16 @@ DS.RESTAdapter.map("App.Invite", {
 // Store
 
 App.store = DS.Store.create({
-	revision: 8,
-	adapter: DS.RESTAdapter.create({
+  revision: 9,
+  adapter: DS.RESTAdapter.create({
     namespace: 'api/v1',
-		mappings: {
+    mappings: {
       member: 'App.Member',
       team: 'App.Team',
       user: 'App.User',
       invite: 'App.Invite'
-  	}
-	})
+    }
+  })
 });
 
 // Join table models
